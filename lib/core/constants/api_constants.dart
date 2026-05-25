@@ -12,7 +12,6 @@ class ApiConstants {
   static const String comments = '/api/Comments';
   static const String likes = '/api/Likes';
   static const String bookmarks = '/api/Bookmarks';
-  static const String predictions = '/api/Predictions';
   static const String follows = '/api/Fans';
   static const String matches = '/api/Matches';
   static const String chats = '/api/Chats';

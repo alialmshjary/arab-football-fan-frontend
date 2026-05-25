@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_assets.dart';
 import '../constants/app_colors.dart';
+import '../network/api_client.dart';
 
 class SaduStrip extends StatelessWidget {
   const SaduStrip({super.key, this.height = 22});
@@ -95,7 +96,7 @@ class AppScreenHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).cardColor,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -110,7 +111,7 @@ class AppScreenHeader extends StatelessWidget implements PreferredSizeWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+                        Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Theme.of(context).textTheme.bodyLarge?.color)),
                         if (subtitle != null) ...[
                           const SizedBox(height: 3),
                           Text(subtitle!, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.muted, fontWeight: FontWeight.w600)),
@@ -143,9 +144,9 @@ class MadrajCard extends StatelessWidget {
       margin: margin,
       padding: padding,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(.045), blurRadius: 18, offset: const Offset(0, 8))],
       ),
       child: child,
@@ -180,4 +181,109 @@ class EmptyState extends StatelessWidget {
       ),
     );
   }
+}
+
+class AppAvatar extends StatelessWidget {
+  const AppAvatar({
+    super.key,
+    this.imageUrl,
+    required this.name,
+    this.radius = 28,
+    this.borderColor = Colors.white,
+  });
+
+  final String? imageUrl;
+  final String name;
+  final double radius;
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final url = imageUrl == null || imageUrl!.trim().isEmpty ? '' : ApiClient.mediaUrl(imageUrl);
+    final letter = name.trim().isEmpty ? 'م' : name.trim().substring(0, 1);
+    return Container(
+      padding: const EdgeInsets.all(2.5),
+      decoration: BoxDecoration(color: borderColor, shape: BoxShape.circle),
+      child: CircleAvatar(
+        radius: radius,
+        backgroundColor: AppColors.black,
+        backgroundImage: url.isEmpty ? null : NetworkImage(url),
+        onBackgroundImageError: url.isEmpty ? null : (_, __) {},
+        child: url.isEmpty
+            ? Text(letter, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: radius * .8))
+            : null,
+      ),
+    );
+  }
+}
+
+class TeamBadge extends StatelessWidget {
+  const TeamBadge({
+    super.key,
+    required this.shortName,
+    this.logoUrl = '',
+    this.primary = AppColors.black,
+    this.secondary = AppColors.red,
+    this.size = 42,
+  });
+
+  final String shortName;
+  final String logoUrl;
+  final Color primary;
+  final Color secondary;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      padding: EdgeInsets.all(size * .12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(size * .28),
+        border: Border.all(color: Theme.of(context).dividerColor),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(.08), blurRadius: 12, offset: const Offset(0, 6))],
+      ),
+      child: logoUrl.trim().isEmpty
+          ? _fallbackBadge()
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(size * .18),
+              child: Image.network(
+                logoUrl,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => _fallbackBadge(),
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return Center(
+                    child: SizedBox(
+                      width: size * .34,
+                      height: size * .34,
+                      child: const CircularProgressIndicator(strokeWidth: 2, color: AppColors.red),
+                    ),
+                  );
+                },
+              ),
+            ),
+    );
+  }
+
+  Widget _fallbackBadge() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [primary, secondary], begin: Alignment.topRight, end: Alignment.bottomLeft),
+        borderRadius: BorderRadius.circular(size * .20),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        shortName.length > 5 ? shortName.substring(0, 5) : shortName,
+        textAlign: TextAlign.center,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: _readableTextColor(primary), fontSize: size * .22, fontWeight: FontWeight.w900),
+      ),
+    );
+  }
+
+  Color _readableTextColor(Color color) => color.computeLuminance() > .58 ? AppColors.black : Colors.white;
 }
