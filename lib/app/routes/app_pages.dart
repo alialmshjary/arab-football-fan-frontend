@@ -14,6 +14,9 @@ import '../../features/posts/posts_binding.dart';
 import '../../features/posts/posts_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/splash/splash_screen.dart';
+import '../../features/matches/matches_screen.dart';
+import '../../features/matches/matches_binding.dart';
+import '../../features/matches/match_details_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -63,7 +66,6 @@ class AppPages {
       binding: BookmarksBinding(),
     ),
 
-
     GetPage(
       name: Routes.followers,
       page: () => const FollowListScreen(mode: 'followers'),
@@ -76,9 +78,32 @@ class AppPages {
       binding: FansBinding(),
     ),
 
-    GetPage(name: Routes.teams, page: () => const _EmptyRoutePage(title: 'الفرق')),
-    GetPage(name: Routes.settings, page: () => const SettingsScreen()),
-    GetPage(name: Routes.matches, page: () => const _EmptyRoutePage(title: 'المباريات')),
+    GetPage(
+      name: Routes.teams,
+      page: () => const _EmptyRoutePage(title: 'الفرق'),
+    ),
+
+    GetPage(
+      name: Routes.matches,
+      page: () => const MatchesScreen(),
+      binding: MatchBinding(),
+    ),
+
+    GetPage(
+      name: Routes.matchDetails, 
+      page: () => const MatchDetailsScreen()
+    ),
+
+    GetPage(
+      name: Routes.chats,
+      page: () => const _EmptyRoutePage(title: 'الدردشات'),
+    ),
+
+    GetPage(
+      name: Routes.settings,
+       page: () => const SettingsScreen()
+       ),
+       
   ];
 }
 

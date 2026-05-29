@@ -14,6 +14,8 @@ abstract class Routes {
   static const following = '/following';
 
   static const matches = '/matches';
+  static const String matchDetails = '/match-details';
+  static const chats = '/chats';
   static const teams = '/teams';
   static const settings = '/settings';
 }
