@@ -4,7 +4,11 @@ import 'package:get/get.dart';
 import '../../features/auth/auth_binding.dart';
 import '../../features/auth/auth_screen.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/home/home_binding.dart';
 import '../../features/splash/splash_screen.dart';
+import '../../features/matches/matches_screen.dart';
+import '../../features/matches/matches_binding.dart';
+import '../../features/matches/match_details_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -22,7 +26,7 @@ class AppPages {
     GetPage(
       name: Routes.home,
       page: () => const HomeScreen(),
-      binding: AuthBinding(),
+      binding: HomeBinding(),
     ),
 
     GetPage(
@@ -77,7 +81,13 @@ class AppPages {
 
     GetPage(
       name: Routes.matches,
-      page: () => const _EmptyRoutePage(title: 'المباريات'),
+      page: () => const MatchesScreen(),
+      binding: MatchBinding(),
+    ),
+
+    GetPage(
+      name: Routes.matchDetails,
+      page: () => const MatchDetailsScreen(),
     ),
 
     GetPage(

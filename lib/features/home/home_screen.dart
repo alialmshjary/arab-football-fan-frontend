@@ -8,6 +8,7 @@ import '../../core/storage/storage_service.dart';
 import '../../core/widgets/app_chrome.dart';
 import '../auth/auth_controller.dart';
 import '../auth/auth_service.dart';
+import '../matches/matches_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -67,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final pages = [
       const _HomeContent(),
-      const _CenterText(text: 'المباريات'),
+      const MatchesScreen(),
       const SizedBox.shrink(),
       const _CenterText(text: 'المجتمع'),
       const _CenterText(text: 'الملف الشخصي'),
