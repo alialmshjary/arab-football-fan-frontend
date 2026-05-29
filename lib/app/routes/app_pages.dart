@@ -3,8 +3,16 @@ import 'package:get/get.dart';
 
 import '../../features/auth/auth_binding.dart';
 import '../../features/auth/auth_screen.dart';
-import '../../features/home/home_screen.dart';
+import '../../features/bookmarks/bookmarks_binding.dart';
+import '../../features/bookmarks/bookmarks_screen.dart';
+import '../../features/fans/fan_profile_screen.dart';
+import '../../features/fans/fans_binding.dart';
+import '../../features/fans/follow_list_screen.dart';
 import '../../features/home/home_binding.dart';
+import '../../features/home/home_screen.dart';
+import '../../features/posts/posts_binding.dart';
+import '../../features/posts/posts_screen.dart';
+import '../../features/settings/settings_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/matches/matches_screen.dart';
 import '../../features/matches/matches_binding.dart';
@@ -31,12 +39,20 @@ class AppPages {
 
     GetPage(
       name: Routes.fanProfile,
-      page: () => const _EmptyRoutePage(title: 'الملف الشخصي'),
+      page: () => const FanProfileScreen(),
+      binding: FansBinding(),
     ),
 
     GetPage(
       name: Routes.posts,
-      page: () => const _EmptyRoutePage(title: 'المجتمع'),
+      page: () => const PostsScreen(),
+      binding: PostsBinding(),
+    ),
+
+    GetPage(
+      name: Routes.postDetails,
+      page: () => const PostDetailsScreen(),
+      binding: PostsBinding(),
     ),
 
     GetPage(
@@ -46,37 +62,25 @@ class AppPages {
 
     GetPage(
       name: Routes.bookmarks,
-      page: () => const _EmptyRoutePage(title: 'المحفوظات'),
-    ),
-
-    GetPage(
-      name: Routes.predictions,
-      page: () => const _EmptyRoutePage(title: 'التوقعات'),
+      page: () => const BookmarksScreen(),
+      binding: BookmarksBinding(),
     ),
 
     GetPage(
       name: Routes.followers,
-      page: () => const _EmptyRoutePage(title: 'المتابعون'),
+      page: () => const FollowListScreen(mode: 'followers'),
+      binding: FansBinding(),
     ),
 
     GetPage(
       name: Routes.following,
-      page: () => const _EmptyRoutePage(title: 'أتابعهم'),
+      page: () => const FollowListScreen(mode: 'following'),
+      binding: FansBinding(),
     ),
 
     GetPage(
       name: Routes.teams,
       page: () => const _EmptyRoutePage(title: 'الفرق'),
-    ),
-
-    GetPage(
-      name: Routes.notifications,
-      page: () => const _EmptyRoutePage(title: 'الإشعارات'),
-    ),
-
-    GetPage(
-      name: Routes.settings,
-      page: () => const _EmptyRoutePage(title: 'الإعدادات'),
     ),
 
     GetPage(
@@ -86,14 +90,20 @@ class AppPages {
     ),
 
     GetPage(
-      name: Routes.matchDetails,
-      page: () => const MatchDetailsScreen(),
+      name: Routes.matchDetails, 
+      page: () => const MatchDetailsScreen()
     ),
 
     GetPage(
       name: Routes.chats,
       page: () => const _EmptyRoutePage(title: 'الدردشات'),
     ),
+
+    GetPage(
+      name: Routes.settings,
+       page: () => const SettingsScreen()
+       ),
+       
   ];
 }
 

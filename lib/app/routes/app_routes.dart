@@ -7,9 +7,9 @@ abstract class Routes {
 
   static const fanProfile = '/fan-profile';
   static const posts = '/posts';
+  static const postDetails = '/post-details';
   static const comments = '/comments';
   static const bookmarks = '/bookmarks';
-  static const predictions = '/predictions';
   static const followers = '/followers';
   static const following = '/following';
 
@@ -17,6 +17,5 @@ abstract class Routes {
   static const String matchDetails = '/match-details';
   static const chats = '/chats';
   static const teams = '/teams';
-  static const notifications = '/notifications';
   static const settings = '/settings';
 }

@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../app/routes/app_routes.dart';
-import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/storage/storage_service.dart';
 import '../../core/widgets/app_chrome.dart';
 import '../auth/auth_controller.dart';
 import '../auth/auth_service.dart';
 import '../matches/matches_screen.dart';
+import '../fans/fan_model.dart';
+import '../fans/fan_profile_screen.dart';
+import '../fans/fans_controller.dart';
+import '../posts/posts_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,72 +33,94 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onNavTap(int index) {
     if (index == 2) {
-      Get.bottomSheet(
-        const _CreateSheet(),
-        isScrollControlled: true,
-        backgroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-        ),
-      );
+      showCreatePostSheet(context);
       return;
     }
-
-    setState(() {
-      currentIndex = index;
-    });
+    if (index == 4 && Get.isRegistered<FansController>()) {
+      Get.find<FansController>().loadMe();
+    }
+    setState(() => currentIndex = index);
   }
 
   Future<void> _logout() async {
     final authService = Get.find<AuthService>();
-
     try {
       await authService.logout();
-    } catch (_) {
-      // حتى لو فشل تسجيل الخروج من السيرفر، نحذف الجلسة محلياً
-    }
-
+    } catch (_) {}
     await StorageService.clearSession();
-
     if (Get.isRegistered<AuthController>()) {
       Get.delete<AuthController>(force: true);
     }
-
     Get.offAllNamed(Routes.auth);
+  }
+
+  List<Widget> _headerActions() {
+    if (currentIndex == 3) {
+      return [
+        IconButton(
+          onPressed: () => _showFanSearchSheet(context),
+          icon: const Icon(Icons.search_rounded),
+        ),
+        IconButton(
+          onPressed: () => showCreatePostSheet(context),
+          icon: const Icon(Icons.add_circle_outline),
+        ),
+      ];
+    }
+
+    if (currentIndex == 4) {
+      return [
+        IconButton(
+          onPressed: () => Get.toNamed(Routes.settings),
+          icon: const Icon(Icons.settings_outlined),
+        ),
+        IconButton(
+          onPressed: () => Get.find<FansController>().refreshCurrent(),
+          icon: const Icon(Icons.refresh_rounded),
+        ),
+      ];
+    }
+
+    return [
+      IconButton(onPressed: _logout, icon: const Icon(Icons.logout_rounded)),
+    ];
+  }
+
+  void _showFanSearchSheet(BuildContext context) {
+    final fansController = Get.find<FansController>();
+    fansController.clearSearch();
+    Get.bottomSheet(
+      _FanSearchSheet(controller: fansController),
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).cardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      const _HomeContent(),
+      _HomeContent(
+        onGoCommunity: () => setState(() => currentIndex = 3),
+        onGoProfile: () => _onNavTap(4),
+      ),
       const MatchesScreen(),
       const SizedBox.shrink(),
-      const _CenterText(text: 'المجتمع'),
-      const _CenterText(text: 'الملف الشخصي'),
+      const PostsScreen(embedded: true),
+      const FanProfileScreen(embedded: true),
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             AppScreenHeader(
               title: titles[currentIndex],
-              leading: IconButton(
-                onPressed: () {
-                  Get.toNamed(Routes.notifications);
-                },
-                icon: const Icon(Icons.notifications_none),
-              ),
-              actions: [
-                IconButton(
-                  onPressed: () {
-                    Get.toNamed(Routes.chats);
-                  },
-                  icon: const Icon(Icons.chat_bubble_outline),
-                ),
-                IconButton(onPressed: _logout, icon: const Icon(Icons.logout)),
-              ],
+              actions: _headerActions(),
+              showPattern: currentIndex != 4,
             ),
             Expanded(
               child: IndexedStack(index: currentIndex, children: pages),
@@ -108,88 +133,302 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+class _FanSearchSheet extends StatelessWidget {
+  const _FanSearchSheet({required this.controller});
+
+  final FansController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * .76,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+          child: Column(
+            children: [
+              Container(
+                width: 50,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'البحث عن مستخدمين',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: controller.searchController,
+                textInputAction: TextInputAction.search,
+                onChanged: controller.searchFans,
+                onSubmitted: controller.searchFans,
+                decoration: InputDecoration(
+                  hintText: 'اكتب اسم المستخدم أو اسم العرض...',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: Obx(
+                    () => controller.isSearching.value
+                        ? const Padding(
+                            padding: EdgeInsets.all(14),
+                            child: SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.red,
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: Obx(() {
+                  if (controller.searchText.value.isEmpty) {
+                    return const EmptyState(
+                      title: 'ابدأ بالبحث',
+                      subtitle:
+                          'يمكنك البحث عن المشجعين ثم فتح بروفايل أي حساب.',
+                      icon: Icons.search_rounded,
+                    );
+                  }
+                  if (controller.isSearching.value &&
+                      controller.searchResults.isEmpty) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: AppColors.red),
+                    );
+                  }
+                  if (controller.searchResults.isEmpty) {
+                    return const EmptyState(
+                      title: 'لا توجد نتائج',
+                      subtitle: 'جرّب اسم مستخدم آخر.',
+                      icon: Icons.person_search_outlined,
+                    );
+                  }
+                  return ListView.separated(
+                    itemCount: controller.searchResults.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) => _FanSearchResultTile(
+                      fan: controller.searchResults[index],
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FanSearchResultTile extends StatelessWidget {
+  const _FanSearchResultTile({required this.fan});
+
+  final FanBasicProfile fan;
+
+  @override
+  Widget build(BuildContext context) {
+    return MadrajCard(
+      padding: EdgeInsets.zero,
+      child: ListTile(
+        onTap: () {
+          Get.back<void>();
+          Get.toNamed(
+            Routes.fanProfile,
+            arguments: {'fanId': fan.id, 'fan': fan},
+          );
+        },
+        leading: AppAvatar(
+          imageUrl: fan.profilePicUrl,
+          name: fan.displayName,
+          radius: 22,
+        ),
+        title: Text(
+          fan.displayName,
+          style: const TextStyle(fontWeight: FontWeight.w900),
+        ),
+        subtitle: Text(
+          fan.bio?.trim().isNotEmpty == true ? fan.bio! : 'مشجع في مجتمع مدرج',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: const Icon(Icons.chevron_left_rounded),
+      ),
+    );
+  }
+}
+
 class _HomeContent extends StatelessWidget {
-  const _HomeContent();
+  const _HomeContent({required this.onGoCommunity, required this.onGoProfile});
+
+  final VoidCallback onGoCommunity;
+  final VoidCallback onGoProfile;
 
   @override
   Widget build(BuildContext context) {
-    final String username = StorageService.username ?? 'يوزر';
-
-    return Center(
-      child: Text(
-        'هاي $username',
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.w900,
-          color: AppColors.black,
+    final username = StorageService.username ?? 'مشجع';
+    final team = StorageService.favoriteTeam;
+    return ListView(
+      padding: const EdgeInsets.all(14),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.black, AppColors.red],
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(.10),
+                blurRadius: 20,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                left: -6,
+                bottom: -12,
+                child: Icon(
+                  Icons.sports_soccer,
+                  color: Colors.white.withOpacity(.16),
+                  size: 96,
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'حياك في مدرج',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    username,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    team == null
+                        ? 'اختر فريقك المفضل من البروفايل لإظهاره في خانة الفريق.'
+                        : 'فريقك المفضل: ${team.name}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            Expanded(
+              child: _QuickCard(
+                icon: Icons.groups_2_outlined,
+                title: 'المجتمع',
+                subtitle: 'منشورات وتفاعل',
+                onTap: onGoCommunity,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _QuickCard(
+                icon: Icons.person_outline,
+                title: 'البروفايل',
+                subtitle: 'فريقك ومنشوراتك',
+                onTap: onGoProfile,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _QuickCard(
+          icon: Icons.bookmarks_outlined,
+          title: 'المحفوظات',
+          subtitle: 'منشورات حفظتها',
+          onTap: () => Get.toNamed(Routes.bookmarks),
+        ),
+      ],
     );
   }
 }
 
-class _CenterText extends StatelessWidget {
-  const _CenterText({required this.text});
+class _QuickCard extends StatelessWidget {
+  const _QuickCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
 
-  final String text;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 26,
-          fontWeight: FontWeight.w900,
-          color: AppColors.black,
+    return MadrajCard(
+      padding: EdgeInsets.zero,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.red.withOpacity(.08),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: AppColors.red),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: AppColors.muted,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
-}
-
-class _CreateSheet extends StatelessWidget {
-  const _CreateSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 18,
-        right: 18,
-        top: 18,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 18,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 48,
-            height: 5,
-            decoration: BoxDecoration(
-              color: AppColors.border,
-              borderRadius: BorderRadius.circular(99),
-            ),
-          ),
-          const SizedBox(height: 18),
-          const Text(
-            'إضافة جديدة',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              color: AppColors.black,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'اربط هذا الزر لاحقاً بإنشاء منشور أو توقع.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.muted, height: 1.5),
-          ),
-          const SizedBox(height: 18),
-        ],
       ),
     );
   }
@@ -203,7 +442,7 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<_NavItem> items = [
+    final items = [
       const _NavItem(
         inactiveIcon: Icons.home_outlined,
         activeIcon: Icons.home,
@@ -230,10 +469,10 @@ class _BottomNav extends StatelessWidget {
     return Container(
       height: 76,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withOpacity(.06),
             blurRadius: 18,
             offset: const Offset(0, -6),
           ),
@@ -243,22 +482,11 @@ class _BottomNav extends StatelessWidget {
         children: List.generate(items.length, (i) {
           if (i == 2) {
             return Expanded(
-              child: GestureDetector(
-                onTap: () => onTap(i),
-                child: Center(
-                  child: Image.asset(
-                    AppAssets.addButton,
-                    height: 62,
-                    width: 62,
-                  ),
-                ),
-              ),
+              child: Center(child: _CreatePostNavButton(onTap: () => onTap(i))),
             );
           }
-
-          final bool active = i == index;
+          final active = i == index;
           final item = items[i];
-
           return Expanded(
             child: InkWell(
               onTap: () => onTap(i),
@@ -267,14 +495,18 @@ class _BottomNav extends StatelessWidget {
                 children: [
                   Icon(
                     active ? item.activeIcon : item.inactiveIcon,
-                    color: active ? AppColors.red : AppColors.black,
+                    color: active
+                        ? AppColors.red
+                        : Theme.of(context).textTheme.bodyLarge?.color,
                     size: 25,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     item.label,
                     style: TextStyle(
-                      color: active ? AppColors.red : AppColors.black,
+                      color: active
+                          ? AppColors.red
+                          : Theme.of(context).textTheme.bodyLarge?.color,
                       fontSize: 10,
                       fontWeight: active ? FontWeight.w900 : FontWeight.w600,
                     ),
@@ -289,14 +521,76 @@ class _BottomNav extends StatelessWidget {
   }
 }
 
-class _NavItem {
-  final IconData inactiveIcon;
-  final IconData activeIcon;
-  final String label;
+class _CreatePostNavButton extends StatelessWidget {
+  const _CreatePostNavButton({required this.onTap});
 
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          width: 54,
+          height: 54,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: isDark
+                  ? [const Color(0xFF24242B), const Color(0xFF17171C)]
+                  : [Colors.white, const Color(0xFFF5F5F5)],
+            ),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: AppColors.red.withOpacity(.30),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.red.withOpacity(.10),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? .25 : .06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: AppColors.red.withOpacity(.10),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const Icon(Icons.add_rounded, color: AppColors.red, size: 30),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem {
   const _NavItem({
     required this.inactiveIcon,
     required this.activeIcon,
     required this.label,
   });
+
+  final IconData inactiveIcon;
+  final IconData activeIcon;
+  final String label;
 }
