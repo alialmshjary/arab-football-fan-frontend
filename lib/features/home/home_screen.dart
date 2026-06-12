@@ -3,15 +3,14 @@ import 'package:get/get.dart';
 
 import '../../app/routes/app_routes.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/storage/storage_service.dart';
 import '../../core/widgets/app_chrome.dart';
-import '../auth/auth_controller.dart';
-import '../auth/auth_service.dart';
 import '../matches/matches_screen.dart';
 import '../fans/fan_model.dart';
 import '../fans/fan_profile_screen.dart';
 import '../fans/fans_controller.dart';
 import '../posts/posts_screen.dart';
+import '../chats/chat_list_screen.dart';
+import '../chats/chat_list_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,10 +23,10 @@ class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
 
   final List<String> titles = const [
-    'الرئيسية',
+    'المجتمع',
     'المباريات',
     '',
-    'المجتمع',
+    'المحادثات',
     'الملف الشخصي',
   ];
 
@@ -39,23 +38,14 @@ class _HomeScreenState extends State<HomeScreen> {
     if (index == 4 && Get.isRegistered<FansController>()) {
       Get.find<FansController>().loadMe();
     }
+    if (index == 3 && Get.isRegistered<ChatListController>()) {
+      Get.find<ChatListController>().fetchChats();
+    }
     setState(() => currentIndex = index);
   }
 
-  Future<void> _logout() async {
-    final authService = Get.find<AuthService>();
-    try {
-      await authService.logout();
-    } catch (_) {}
-    await StorageService.clearSession();
-    if (Get.isRegistered<AuthController>()) {
-      Get.delete<AuthController>(force: true);
-    }
-    Get.offAllNamed(Routes.auth);
-  }
-
   List<Widget> _headerActions() {
-    if (currentIndex == 3) {
+    if (currentIndex == 0) {
       return [
         IconButton(
           onPressed: () => _showFanSearchSheet(context),
@@ -64,6 +54,17 @@ class _HomeScreenState extends State<HomeScreen> {
         IconButton(
           onPressed: () => showCreatePostSheet(context),
           icon: const Icon(Icons.add_circle_outline),
+        ),
+      ];
+    }
+
+    if (currentIndex == 3) {
+      return [
+        IconButton(
+          onPressed: () {
+            Get.toNamed(Routes.createGroupChat);
+          },
+          icon: const Icon(Icons.group_add_outlined),
         ),
       ];
     }
@@ -81,9 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ];
     }
 
-    return [
-      IconButton(onPressed: _logout, icon: const Icon(Icons.logout_rounded)),
-    ];
+    return [];
   }
 
   void _showFanSearchSheet(BuildContext context) {
@@ -102,13 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      _HomeContent(
-        onGoCommunity: () => setState(() => currentIndex = 3),
-        onGoProfile: () => _onNavTap(4),
-      ),
+      const PostsScreen(embedded: true),
       const MatchesScreen(),
       const SizedBox.shrink(),
-      const PostsScreen(embedded: true),
+      const ChatListScreen(),
       const FanProfileScreen(embedded: true),
     ];
 
@@ -265,175 +261,6 @@ class _FanSearchResultTile extends StatelessWidget {
   }
 }
 
-class _HomeContent extends StatelessWidget {
-  const _HomeContent({required this.onGoCommunity, required this.onGoProfile});
-
-  final VoidCallback onGoCommunity;
-  final VoidCallback onGoProfile;
-
-  @override
-  Widget build(BuildContext context) {
-    final username = StorageService.username ?? 'مشجع';
-    final team = StorageService.favoriteTeam;
-    return ListView(
-      padding: const EdgeInsets.all(14),
-      children: [
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.black, AppColors.red],
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-            ),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(.10),
-                blurRadius: 20,
-                offset: const Offset(0, 12),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                left: -6,
-                bottom: -12,
-                child: Icon(
-                  Icons.sports_soccer,
-                  color: Colors.white.withOpacity(.16),
-                  size: 96,
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'حياك في مدرج',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    username,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    team == null
-                        ? 'اختر فريقك المفضل من البروفايل لإظهاره في خانة الفريق.'
-                        : 'فريقك المفضل: ${team.name}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      height: 1.45,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        Row(
-          children: [
-            Expanded(
-              child: _QuickCard(
-                icon: Icons.groups_2_outlined,
-                title: 'المجتمع',
-                subtitle: 'منشورات وتفاعل',
-                onTap: onGoCommunity,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _QuickCard(
-                icon: Icons.person_outline,
-                title: 'البروفايل',
-                subtitle: 'فريقك ومنشوراتك',
-                onTap: onGoProfile,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        _QuickCard(
-          icon: Icons.bookmarks_outlined,
-          title: 'المحفوظات',
-          subtitle: 'منشورات حفظتها',
-          onTap: () => Get.toNamed(Routes.bookmarks),
-        ),
-      ],
-    );
-  }
-}
-
-class _QuickCard extends StatelessWidget {
-  const _QuickCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return MadrajCard(
-      padding: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: AppColors.red.withOpacity(.08),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, color: AppColors.red),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  color: AppColors.muted,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _BottomNav extends StatelessWidget {
   const _BottomNav({required this.index, required this.onTap});
 
@@ -444,9 +271,9 @@ class _BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       const _NavItem(
-        inactiveIcon: Icons.home_outlined,
-        activeIcon: Icons.home,
-        label: 'الرئيسية',
+        inactiveIcon: Icons.groups_2_outlined,
+        activeIcon: Icons.groups_2,
+        label: 'المجتمع',
       ),
       const _NavItem(
         inactiveIcon: Icons.calendar_month_outlined,
@@ -455,9 +282,9 @@ class _BottomNav extends StatelessWidget {
       ),
       const _NavItem(inactiveIcon: Icons.add, activeIcon: Icons.add, label: ''),
       const _NavItem(
-        inactiveIcon: Icons.groups_2_outlined,
-        activeIcon: Icons.groups_2,
-        label: 'المجتمع',
+        inactiveIcon: Icons.chat_bubble_outline,
+        activeIcon: Icons.chat_bubble,
+        label: 'المحادثات',
       ),
       const _NavItem(
         inactiveIcon: Icons.person_outline,

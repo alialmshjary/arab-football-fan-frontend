@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import '../../app/routes/app_routes.dart';
+import '../chats/chat_service.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/app_chrome.dart';
 import 'match_model.dart';
+import '../../core/constants/api_constants.dart';
 
 class MatchDetailsScreen extends StatelessWidget {
   const MatchDetailsScreen({super.key});
@@ -29,10 +31,6 @@ class MatchDetailsScreen extends StatelessWidget {
       appBar: AppScreenHeader(
         title: 'تفاصيل المباراة',
         subtitle: match.league,
-        leading: IconButton(
-          onPressed: Get.back,
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -46,7 +44,12 @@ class MatchDetailsScreen extends StatelessWidget {
 
                 Row(
                   children: [
-                    Expanded(child: _TeamBlock(name: match.homeTeam)),
+                    Expanded(
+                      child: _TeamBlock(
+                        name: match.homeTeam,
+                        logoUrl: match.homeTeamLogoUrl,
+                      ),
+                    ),
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
@@ -58,7 +61,12 @@ class MatchDetailsScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Expanded(child: _TeamBlock(name: match.awayTeam)),
+                    Expanded(
+                      child: _TeamBlock(
+                        name: match.awayTeam,
+                        logoUrl: match.awayTeamLogoUrl,
+                      ),
+                    ),
                   ],
                 ),
 
@@ -86,15 +94,39 @@ class MatchDetailsScreen extends StatelessWidget {
                   title: 'حالة التوقعات',
                   value: match.predictionState,
                 ),
-                _InfoRow(
-                  icon: Icons.chat_bubble_outline,
-                  title: 'رابط المحادثة',
-                  value: match.chatUrl?.isNotEmpty == true
-                      ? match.chatUrl!
-                      : 'غير مربوط',
-                ),
               ],
             ),
+          ),
+          const SizedBox(height: 16),
+
+          ElevatedButton.icon(
+            onPressed: () async {
+              try {
+                final chat = await Get.find<ChatService>().getMatchChat(
+                  match.id,
+                );
+
+                await Get.toNamed(
+                  Routes.chats,
+                  arguments: {
+                    'chatId': chat.id,
+                    'chatTitle':
+                        chat.title ?? '${match.homeTeam} vs ${match.awayTeam}',
+                    'chatType': chat.chatType,
+                  },
+                );
+              } catch (e) {
+                debugPrint('CHAT BUTTON ERROR = $e');
+
+                Get.snackbar(
+                  'خطأ',
+                  'تعذر فتح شات المباراة',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+            },
+            icon: const Icon(Icons.chat_bubble_outline),
+            label: const Text('دخول شات المباراة'),
           ),
         ],
       ),
@@ -103,18 +135,49 @@ class MatchDetailsScreen extends StatelessWidget {
 }
 
 class _TeamBlock extends StatelessWidget {
-  const _TeamBlock({required this.name});
+  const _TeamBlock({required this.name, this.logoUrl});
 
   final String name;
+  final String? logoUrl;
+
+  String get fullLogoUrl {
+    if (logoUrl == null) return '';
+
+    if (logoUrl!.startsWith('http')) {
+      return logoUrl!;
+    }
+
+    return '${ApiConstants.serverUrl}$logoUrl';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const CircleAvatar(
+        CircleAvatar(
           radius: 34,
           backgroundColor: Colors.white,
-          child: Icon(Icons.shield_outlined, color: AppColors.black, size: 34),
+          child: logoUrl != null
+              ? ClipOval(
+                  child: Image.network(
+                    fullLogoUrl,
+                    width: 52,
+                    height: 52,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) {
+                      return const Icon(
+                        Icons.shield_outlined,
+                        color: AppColors.black,
+                        size: 34,
+                      );
+                    },
+                  ),
+                )
+              : const Icon(
+                  Icons.shield_outlined,
+                  color: AppColors.black,
+                  size: 34,
+                ),
         ),
         const SizedBox(height: 10),
         Text(

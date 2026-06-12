@@ -12,6 +12,8 @@ import '../fans/fans_service.dart';
 import '../posts/posts_controller.dart';
 import '../posts/posts_service.dart';
 import 'home_controller.dart';
+import '../chats/chat_service.dart';
+import '../chats/chat_list_controller.dart';
 
 class HomeBinding extends Bindings {
   @override
@@ -81,6 +83,15 @@ class HomeBinding extends Bindings {
     }
     if (!Get.isRegistered<HomeController>()) {
       Get.lazyPut<HomeController>(() => HomeController(), fenix: true);
+    }
+    if (!Get.isRegistered<ChatService>()) {
+      Get.put<ChatService>(ChatService(Get.find<ApiClient>()), permanent: true);
+    }
+    if (!Get.isRegistered<ChatListController>()) {
+      Get.lazyPut<ChatListController>(
+        () => ChatListController(Get.find<ChatService>()),
+        fenix: true,
+      );
     }
   }
 }

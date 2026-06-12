@@ -8,6 +8,7 @@ import '../../core/widgets/loading_widget.dart';
 import 'match_model.dart';
 import 'matches_controller.dart';
 import '../../app/routes/app_routes.dart';
+import '../../core/constants/api_constants.dart';
 
 class MatchesScreen extends GetView<MatchesController> {
   const MatchesScreen({super.key});
@@ -120,7 +121,12 @@ class _MatchCard extends StatelessWidget {
 
           Row(
             children: [
-              Expanded(child: _TeamName(name: match.homeTeam)),
+              Expanded(
+                child: _TeamName(
+                  name: match.homeTeam,
+                  logoUrl: match.homeTeamLogoUrl,
+                ),
+              ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
@@ -132,7 +138,12 @@ class _MatchCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Expanded(child: _TeamName(name: match.awayTeam)),
+              Expanded(
+                child: _TeamName(
+                  name: match.awayTeam,
+                  logoUrl: match.awayTeamLogoUrl,
+                ),
+              ),
             ],
           ),
 
@@ -201,18 +212,44 @@ class _MatchCard extends StatelessWidget {
 }
 
 class _TeamName extends StatelessWidget {
-  const _TeamName({required this.name});
+  const _TeamName({required this.name, this.logoUrl});
 
   final String name;
+  final String? logoUrl;
+
+  String get fullLogoUrl {
+    if (logoUrl == null) return '';
+
+    if (logoUrl!.startsWith('http')) {
+      return logoUrl!;
+    }
+
+    return '${ApiConstants.serverUrl}$logoUrl';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const CircleAvatar(
+        CircleAvatar(
           radius: 24,
           backgroundColor: AppColors.background,
-          child: Icon(Icons.shield_outlined, color: AppColors.black),
+          child: logoUrl != null
+              ? ClipOval(
+                  child: Image.network(
+                    fullLogoUrl,
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) {
+                      return const Icon(
+                        Icons.shield_outlined,
+                        color: AppColors.black,
+                      );
+                    },
+                  ),
+                )
+              : const Icon(Icons.shield_outlined, color: AppColors.black),
         ),
         const SizedBox(height: 8),
         Text(
@@ -260,7 +297,7 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = text == 'Live' || text == 'مباشر'
+    final color = text == 'Live' || text == 'مباشرة'
         ? AppColors.red
         : text == 'Finished' || text == 'منتهية'
         ? AppColors.muted

@@ -2,7 +2,9 @@ class MatchModel {
   const MatchModel({
     required this.id,
     required this.homeTeam,
+    this.homeTeamLogoUrl,
     required this.awayTeam,
+    this.awayTeamLogoUrl,
     required this.league,
     required this.matchDate,
     required this.hour,
@@ -10,12 +12,13 @@ class MatchModel {
     required this.period,
     required this.status,
     required this.predictionState,
-    this.chatUrl,
   });
 
   final int id;
   final String homeTeam;
+  final String? homeTeamLogoUrl;
   final String awayTeam;
+  final String? awayTeamLogoUrl;
   final String league;
   final String matchDate;
   final int hour;
@@ -23,7 +26,6 @@ class MatchModel {
   final String period;
   final String status;
   final String predictionState;
-  final String? chatUrl;
 
   factory MatchModel.fromJson(Map<String, dynamic> json) {
     int parseInt(dynamic value) {
@@ -31,36 +33,47 @@ class MatchModel {
       return int.tryParse('$value') ?? 0;
     }
 
+    String? parseNullableString(dynamic value) {
+      if (value == null) return null;
+      final text = value.toString().trim();
+      return text.isEmpty ? null : text;
+    }
+
     return MatchModel(
       id: parseInt(json['id'] ?? json['Id']),
       homeTeam: (json['homeTeam'] ?? json['HomeTeam'] ?? '').toString(),
+      homeTeamLogoUrl: parseNullableString(
+        json['homeTeamLogoUrl'] ?? json['HomeTeamLogoUrl'],
+      ),
       awayTeam: (json['awayTeam'] ?? json['AwayTeam'] ?? '').toString(),
+      awayTeamLogoUrl: parseNullableString(
+        json['awayTeamLogoUrl'] ?? json['AwayTeamLogoUrl'],
+      ),
       league: (json['league'] ?? json['League'] ?? '').toString(),
       matchDate: (json['matchDate'] ?? json['MatchDate'] ?? '').toString(),
       hour: parseInt(json['hour'] ?? json['Hour']),
       minute: parseInt(json['minute'] ?? json['Minute']),
       period: (json['period'] ?? json['Period'] ?? '').toString(),
       status: parseStatus(json['status'] ?? json['Status']),
-      predictionState: parsePredictionState(json['predictionState'] ?? json['PredictionState'],),
-      chatUrl: json['chatUrl'] ?? json['ChatUrl'],
+      predictionState: parsePredictionState(
+        json['predictionState'] ?? json['PredictionState'],
+      ),
     );
   }
 
   String get formattedTime =>
       '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
 
-
-
   static String parseStatus(dynamic value) {
-  switch ('$value') {
-    case '0':
-      return 'قادمة';
-    case '1':
-      return 'مباشرة';
-    case '2':
-      return 'منتهية';
-    default:
-      return value?.toString() ?? 'غير معروف';
+    switch ('$value') {
+      case '0':
+        return 'قادمة';
+      case '1':
+        return 'مباشرة';
+      case '2':
+        return 'منتهية';
+      default:
+        return value?.toString() ?? 'غير معروف';
     }
   }
 
@@ -74,7 +87,4 @@ class MatchModel {
         return value?.toString() ?? 'غير معروف';
     }
   }
-
 }
-
-

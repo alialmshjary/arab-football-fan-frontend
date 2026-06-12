@@ -31,6 +31,12 @@ class MatchesController extends GetxController {
     fetchMatches();
   }
 
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
+  }
+
   Future<void> fetchMatches({bool refresh = false}) async {
     if (isLoading.value || isLoadingMore.value) return;
 

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../chats/chat_service.dart';
 
 import '../../core/network/api_client.dart';
 import '../comments/comments_controller.dart';
@@ -15,22 +16,43 @@ class FansBinding extends Bindings {
       Get.put<ApiClient>(ApiClient(), permanent: true);
     }
     if (!Get.isRegistered<FansService>()) {
-      Get.lazyPut<FansService>(() => FansService(Get.find<ApiClient>()), fenix: true);
+      Get.lazyPut<FansService>(
+        () => FansService(Get.find<ApiClient>()),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<FansController>()) {
-      Get.lazyPut<FansController>(() => FansController(Get.find<FansService>()), fenix: true);
+      Get.lazyPut<FansController>(
+        () => FansController(Get.find<FansService>()),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<PostsService>()) {
-      Get.lazyPut<PostsService>(() => PostsService(Get.find<ApiClient>()), fenix: true);
+      Get.lazyPut<PostsService>(
+        () => PostsService(Get.find<ApiClient>()),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<PostsController>()) {
-      Get.lazyPut<PostsController>(() => PostsController(Get.find<PostsService>()), fenix: true);
+      Get.lazyPut<PostsController>(
+        () => PostsController(Get.find<PostsService>()),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<CommentsService>()) {
-      Get.lazyPut<CommentsService>(() => CommentsService(Get.find<ApiClient>()), fenix: true);
+      Get.lazyPut<CommentsService>(
+        () => CommentsService(Get.find<ApiClient>()),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<CommentsController>()) {
-      Get.lazyPut<CommentsController>(() => CommentsController(Get.find<CommentsService>()), fenix: true);
+      Get.lazyPut<CommentsController>(
+        () => CommentsController(Get.find<CommentsService>()),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<ChatService>()) {
+      Get.put<ChatService>(ChatService(Get.find<ApiClient>()), permanent: true);
     }
   }
 }
