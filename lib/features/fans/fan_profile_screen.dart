@@ -12,7 +12,8 @@ import 'fan_model.dart';
 import 'fans_controller.dart';
 import 'favorite_player.dart';
 import 'favorite_team.dart';
-
+import '../../core/storage/storage_service.dart';
+import '../chats/chat_service.dart';
 part 'widgets/fan_profile_hero.dart';
 part 'widgets/favorite_profile_cards.dart';
 part 'widgets/profile_post_grid.dart';

@@ -63,7 +63,50 @@ class _ProfileHero extends StatelessWidget {
                       if (controller.isMyProfile)
                         _HeroAction(label: 'تعديل', icon: Icons.edit_rounded, onTap: () => _showEditSheet(context, controller))
                       else
-                        Obx(() => _HeroAction(label: controller.isFollowing.value ? 'أتابعه' : 'متابعة', icon: controller.isFollowing.value ? Icons.check_rounded : Icons.person_add_alt_1_rounded, onTap: controller.toggleFollow)),
+                        Row(
+                          children: [
+                            Obx(() => _HeroAction(
+                              label: controller.isFollowing.value ? 'أتابعه' : 'متابعة',
+                              icon: controller.isFollowing.value
+                                  ? Icons.check_rounded
+                                  : Icons.person_add_alt_1_rounded,
+                              onTap: controller.toggleFollow,
+                            )),
+
+                            const SizedBox(width: 8),
+
+                            _HeroAction(
+                              label: 'مراسلة',
+                              icon: Icons.message_outlined,
+                              onTap: () async {
+                                try {
+                                  final currentUserId = StorageService.userId;
+
+                                  if (currentUserId == null) {
+                                    Get.snackbar('خطأ', 'يجب تسجيل الدخول أولًا');
+                                    return;
+                                  }
+
+                                  final chat = await Get.find<ChatService>().createPrivateChat(
+                                    fan1Id: currentUserId,
+                                    fan2Id: profile.id,
+                                  );
+
+                                  Get.toNamed(
+                                    Routes.chats,
+                                    arguments: {
+                                      'chatId': chat.id,
+                                      'chatTitle': profile.displayName,
+                                      'chatType': chat.chatType,
+                                    },
+                                  );
+                                } catch (e) {
+                                  Get.snackbar('خطأ', e.toString());
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ),

@@ -17,6 +17,12 @@ import '../../features/splash/splash_screen.dart';
 import '../../features/matches/matches_screen.dart';
 import '../../features/matches/matches_binding.dart';
 import '../../features/matches/match_details_screen.dart';
+import '../../features/chats/chat_binding.dart';
+import '../../features/chats/chat_screen.dart';
+import '../../features/chats/chat_list_screen.dart';
+import '../../features/chatmembers/create_group_chat_screen.dart';
+import '../../features/chatmembers/chat_members_screen.dart';
+import '../../features/chatmembers/chat_members_binding.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -90,20 +96,40 @@ class AppPages {
     ),
 
     GetPage(
-      name: Routes.matchDetails, 
-      page: () => const MatchDetailsScreen()
+      name: Routes.matchDetails,
+      page: () => const MatchDetailsScreen(),
+      binding: MatchBinding(),
     ),
 
     GetPage(
       name: Routes.chats,
-      page: () => const _EmptyRoutePage(title: 'الدردشات'),
+      page: () => const ChatScreen(),
+      binding: ChatBinding(),
     ),
 
     GetPage(
-      name: Routes.settings,
-       page: () => const SettingsScreen()
-       ),
-       
+      name: Routes.chatList,
+      page: () => const ChatListScreen(),
+      binding: ChatBinding(),
+    ),
+
+    GetPage(
+      name: Routes.chatMembers,
+      page: () => const ChatMembersScreen(),
+      binding: ChatMembersBinding(),
+    ),
+    
+    GetPage(
+      name: Routes.createGroupChat,
+      page: () => const CreateGroupChatScreen(),
+      binding: ChatBinding(),
+    ),
+
+    GetPage(
+      name: Routes.settings, 
+      page: () => const SettingsScreen()
+    ),
+    
   ];
 }
 

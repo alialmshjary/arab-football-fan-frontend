@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../core/network/api_client.dart';
+import '../chats/chat_service.dart';
 import 'matches_controller.dart';
 import 'matches_service.dart';
 
@@ -23,6 +24,10 @@ class MatchBinding extends Bindings {
         () => MatchesController(Get.find<MatchesService>()),
         fenix: true,
       );
+    }
+    
+    if (!Get.isRegistered<ChatService>()) {
+      Get.put<ChatService>(ChatService(Get.find<ApiClient>()), permanent: true);
     }
   }
 }
