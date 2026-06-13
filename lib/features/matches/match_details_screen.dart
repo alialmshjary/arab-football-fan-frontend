@@ -28,10 +28,7 @@ class MatchDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppScreenHeader(
-        title: 'تفاصيل المباراة',
-        subtitle: match.league,
-      ),
+      appBar: AppScreenHeader(title: 'تفاصيل المباراة', subtitle: match.league),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -120,7 +117,7 @@ class MatchDetailsScreen extends StatelessWidget {
 
                 Get.snackbar(
                   'خطأ',
-                  'تعذر فتح شات المباراة',
+                  e.toString().replaceFirst('Exception: ', ''),
                   snackPosition: SnackPosition.BOTTOM,
                 );
               }
