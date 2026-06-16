@@ -21,4 +21,5 @@ abstract class Routes {
   static const chatMembers = '/chat-members';
   static const teams = '/teams';
   static const settings = '/settings';
+  static const String matchPrediction = '/match-prediction';
 }
