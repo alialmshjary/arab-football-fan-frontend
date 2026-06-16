@@ -23,6 +23,7 @@ import '../../features/chats/chat_list_screen.dart';
 import '../../features/chatmembers/create_group_chat_screen.dart';
 import '../../features/chatmembers/chat_members_screen.dart';
 import '../../features/chatmembers/chat_members_binding.dart';
+import '../../features/predictions/predictions_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -118,18 +119,20 @@ class AppPages {
       page: () => const ChatMembersScreen(),
       binding: ChatMembersBinding(),
     ),
-    
+
     GetPage(
       name: Routes.createGroupChat,
       page: () => const CreateGroupChatScreen(),
       binding: ChatBinding(),
     ),
 
+    GetPage(name: Routes.settings, page: () => const SettingsScreen()),
+
     GetPage(
-      name: Routes.settings, 
-      page: () => const SettingsScreen()
+      name: Routes.matchPrediction,
+      page: () => const MatchPredictionScreen(),
+      binding: MatchBinding(),
     ),
-    
   ];
 }
 
