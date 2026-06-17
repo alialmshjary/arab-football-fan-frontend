@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import 'comment_model.dart';
 import 'comments_service.dart';
+import '../../core/utils/app_snackbar.dart';
 
 class CommentsController extends GetxController {
   CommentsController(this._service);
@@ -76,19 +77,10 @@ class CommentsController extends GetxController {
     }
   }
 
-  String _cleanError(Object error) => error.toString().replaceFirst('Exception: ', '');
+  String _cleanError(Object error) => AppSnackbar.cleanError(error);
 
   void _toast(String title, String message) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 14,
-      backgroundColor: Colors.black87,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
-    );
+    AppSnackbar.show(title, message);
   }
 
   @override

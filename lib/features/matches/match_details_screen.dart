@@ -5,6 +5,8 @@ import '../../app/routes/app_routes.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/app_chrome.dart';
+import '../../core/widgets/cached_app_image.dart';
+import '../../core/utils/app_snackbar.dart';
 import '../chats/chat_service.dart';
 import 'match_model.dart';
 
@@ -140,11 +142,7 @@ class MatchDetailsScreen extends StatelessWidget {
               } catch (e) {
                 debugPrint('CHAT BUTTON ERROR = $e');
 
-                Get.snackbar(
-                  'خطأ',
-                  e.toString().replaceFirst('Exception: ', ''),
-                  snackPosition: SnackPosition.BOTTOM,
-                );
+                AppSnackbar.show('خطأ', AppSnackbar.cleanError(e));
               }
             },
             icon: const Icon(Icons.chat_bubble_outline),
@@ -184,18 +182,16 @@ class _TeamBlock extends StatelessWidget {
           backgroundColor: Colors.white,
           child: logoUrl != null
               ? ClipOval(
-                  child: Image.network(
-                    fullLogoUrl,
+                  child: CachedAppImage(
+                    imageUrl: fullLogoUrl,
                     width: 52,
                     height: 52,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) {
-                      return const Icon(
-                        Icons.shield_outlined,
-                        color: AppColors.black,
-                        size: 34,
-                      );
-                    },
+                    errorWidget: const Icon(
+                      Icons.shield_outlined,
+                      color: AppColors.black,
+                      size: 34,
+                    ),
                   ),
                 )
               : const Icon(

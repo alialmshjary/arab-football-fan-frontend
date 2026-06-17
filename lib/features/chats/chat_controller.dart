@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/storage/storage_service.dart';
+import '../../core/media/media_compressor.dart';
+import '../../core/utils/app_snackbar.dart';
 import 'chat_message_model.dart';
 import 'chat_service.dart';
 import 'dart:io';
@@ -54,7 +56,7 @@ class ChatController extends GetxController {
       messages.assignAll(result);
       scrollToBottom();
     } catch (e) {
-      Get.snackbar('خطأ', 'فشل تحميل الرسائل');
+      AppSnackbar.show('خطأ', 'تعذر تحميل الرسائل. تحقق من اتصالك وحاول مرة أخرى.');
     } finally {
       isLoading.value = false;
     }
@@ -65,7 +67,7 @@ class ChatController extends GetxController {
       final token = StorageService.token;
 
       if (token == null || token.isEmpty) {
-        Get.snackbar('خطأ', 'يجب تسجيل الدخول أولًا');
+        AppSnackbar.show('خطأ', 'يجب تسجيل الدخول أولًا');
         return;
       }
       await _service.connect(
@@ -77,7 +79,7 @@ class ChatController extends GetxController {
           scrollToBottom();
         },
         onError: (error) {
-          Get.snackbar('خطأ في الشات', error);
+          AppSnackbar.show('خطأ في الشات', error);
         },
       );
 
@@ -86,7 +88,7 @@ class ChatController extends GetxController {
       isConnected.value = true;
     } catch (e) {
       isConnected.value = false;
-      Get.snackbar('خطأ', 'فشل الاتصال بالشات');
+      AppSnackbar.show('خطأ', 'تعذر الاتصال بالشات. تحقق من اتصالك وحاول مرة أخرى.');
     }
   }
 
@@ -98,7 +100,8 @@ class ChatController extends GetxController {
 
     if (pickedFile == null) return;
 
-    selectedMediaPath.value = pickedFile.path;
+    final compressedPath = await MediaCompressor.compressImage(pickedFile.path);
+    selectedMediaPath.value = compressedPath;
     selectedMessageType.value = 1;
   }
 
@@ -107,7 +110,8 @@ class ChatController extends GetxController {
 
     if (pickedFile == null) return;
 
-    selectedMediaPath.value = pickedFile.path;
+    final compressedPath = await MediaCompressor.compressVideo(pickedFile.path);
+    selectedMediaPath.value = compressedPath;
     selectedMessageType.value = 2;
   }
 
@@ -149,7 +153,7 @@ class ChatController extends GetxController {
       messageController.clear();
     } catch (e) {
       debugPrint('SEND MESSAGE ERROR = $e');
-      Get.snackbar('خطأ', e.toString());
+      AppSnackbar.show('خطأ', AppSnackbar.cleanError(e));
     } finally {
       isUploading.value = false;
       isSending.value = false;
@@ -164,6 +168,7 @@ class ChatController extends GetxController {
     messageController.dispose();
     scrollController.dispose();
 
+    MediaCompressor.clearTempVideos();
     super.onClose();
   }
 

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import 'match_model.dart';
 import 'matches_service.dart';
+import '../../core/utils/app_snackbar.dart';
 
 class MatchesController extends GetxController {
   MatchesController(this._service);
@@ -123,15 +124,6 @@ class MatchesController extends GetxController {
   }
 
   void _toast(String title, String message) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 14,
-      backgroundColor: Colors.black87,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
-    );
+    AppSnackbar.show(title, message);
   }
 }

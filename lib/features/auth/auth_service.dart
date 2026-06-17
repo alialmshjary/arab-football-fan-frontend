@@ -35,7 +35,7 @@ class AuthService {
     try {
       await _api.post<bool>('${ApiConstants.auth}/logout');
     } catch (_) {
-      // الجلسة المحلية ستنحذف حتى لو كان السيرفر غير متاح.
+      // الجلسة المحلية ستنحذف حتى لو كانت الخدمة غير متاحة.
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../app/routes/app_routes.dart';
 import '../../core/storage/storage_service.dart';
+import '../../core/utils/app_snackbar.dart';
 import 'chat_member_model.dart';
 import 'chat_members_service.dart';
 
@@ -41,7 +42,7 @@ class ChatMembersController extends GetxController {
 
       members.assignAll(result);
     } catch (e) {
-      Get.snackbar('خطأ', 'فشل تحميل الأعضاء');
+      AppSnackbar.show('خطأ', 'تعذر تحميل الأعضاء. تحقق من اتصالك وحاول مرة أخرى.');
     } finally {
       isLoading.value = false;
     }
@@ -51,7 +52,7 @@ class ChatMembersController extends GetxController {
     final fanId = StorageService.userId;
 
     if (fanId == null) {
-      Get.snackbar('خطأ', 'يجب تسجيل الدخول أولًا');
+      AppSnackbar.show('خطأ', 'يجب تسجيل الدخول أولًا');
       return;
     }
 
@@ -80,9 +81,9 @@ class ChatMembersController extends GetxController {
       await _service.leaveChat(chatId: chatId, fanId: fanId);
 
       Get.offAllNamed(Routes.home);
-      Get.snackbar('تم', 'خرجت من المجموعة');
+      AppSnackbar.show('تم', 'خرجت من المجموعة');
     } catch (e) {
-      Get.snackbar('خطأ', 'فشل الخروج من المجموعة');
+      AppSnackbar.show('خطأ', 'تعذر الخروج من المجموعة حاليًا. حاول مرة أخرى.');
     } finally {
       isLeaving.value = false;
     }

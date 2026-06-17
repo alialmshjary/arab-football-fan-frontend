@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../app/routes/app_routes.dart';
 import '../../core/storage/storage_service.dart';
+import '../../core/utils/app_snackbar.dart';
 import '../fans/fan_model.dart';
 import '../fans/fans_service.dart';
 import '../chats/chat_service.dart';
@@ -49,7 +50,7 @@ class _CreateGroupChatScreenState extends State<CreateGroupChatScreen> {
           );
       });
     } catch (e) {
-      Get.snackbar('خطأ', e.toString());
+      AppSnackbar.show('خطأ', AppSnackbar.cleanError(e));
     } finally {
       if (mounted) {
         setState(() => isSearching = false);
@@ -74,17 +75,17 @@ class _CreateGroupChatScreenState extends State<CreateGroupChatScreen> {
     final currentUserId = StorageService.userId;
 
     if (currentUserId == null) {
-      Get.snackbar('خطأ', 'يجب تسجيل الدخول أولًا');
+      AppSnackbar.show('خطأ', 'يجب تسجيل الدخول أولًا');
       return;
     }
 
     if (title.isEmpty) {
-      Get.snackbar('تنبيه', 'اكتب اسم المجموعة');
+      AppSnackbar.show('تنبيه', 'اكتب اسم المجموعة');
       return;
     }
 
     if (selectedFans.isEmpty) {
-      Get.snackbar('تنبيه', 'اختر مشجعًا واحدًا على الأقل');
+      AppSnackbar.show('تنبيه', 'اختر مشجعًا واحدًا على الأقل');
       return;
     }
 
@@ -110,7 +111,7 @@ class _CreateGroupChatScreenState extends State<CreateGroupChatScreen> {
         },
       );
     } catch (e) {
-      Get.snackbar('خطأ', e.toString());
+      AppSnackbar.show('خطأ', AppSnackbar.cleanError(e));
     } finally {
       if (mounted) {
         setState(() => isCreating = false);

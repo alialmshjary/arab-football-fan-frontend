@@ -207,14 +207,11 @@ class _PlayerAvatar extends StatelessWidget {
         width: size,
         height: size,
         color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF23232A) : AppColors.background,
-        child: Image.network(
-          player.photoUrl,
+        child: CachedAppImage(
+          imageUrl: player.photoUrl,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Center(child: Text(initials, style: TextStyle(fontSize: size * .22, fontWeight: FontWeight.w900, color: AppColors.red))),
-          loadingBuilder: (context, child, progress) {
-            if (progress == null) return child;
-            return const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.red));
-          },
+          placeholder: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.red)),
+          errorWidget: Center(child: Text(initials, style: TextStyle(fontSize: size * .22, fontWeight: FontWeight.w900, color: AppColors.red))),
         ),
       ),
     );

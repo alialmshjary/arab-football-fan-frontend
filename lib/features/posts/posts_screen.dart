@@ -6,7 +6,9 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/network/api_client.dart';
+import '../../core/media/media_compressor.dart';
 import '../../core/widgets/app_chrome.dart';
+import '../../core/widgets/cached_app_image.dart';
 import '../../core/widgets/custom_button.dart';
 import '../../core/widgets/custom_text_field.dart';
 import '../../app/routes/app_routes.dart';
@@ -178,7 +180,7 @@ class _CreatePostSheet extends StatelessWidget {
                               SizedBox(height: 8),
                               Text('اختر صورة أو فيديو', style: TextStyle(fontWeight: FontWeight.w900)),
                               SizedBox(height: 4),
-                              Text('يدعم الباك اند الصور والفيديوهات حسب الامتدادات المسموحة', textAlign: TextAlign.center, style: TextStyle(color: AppColors.muted, fontSize: 12)),
+                              Text('يدعم التطبيق الصور والفيديوهات بالامتدادات المسموحة', textAlign: TextAlign.center, style: TextStyle(color: AppColors.muted, fontSize: 12)),
                             ],
                           )
                         : ClipRRect(
@@ -225,7 +227,9 @@ class _EditPostSheetState extends State<_EditPostSheet> {
     final picker = ImagePicker();
     final media = await picker.pickMedia(imageQuality: 86);
     if (media == null) return;
-    setState(() => newMediaPath = media.path);
+
+    final compressedPath = await MediaCompressor.compressMedia(media.path);
+    setState(() => newMediaPath = compressedPath);
   }
 
   Future<void> _save() async {
@@ -276,7 +280,11 @@ class _EditPostSheetState extends State<_EditPostSheet> {
                         else if (widget.post.isVideo)
                           const Center(child: Icon(Icons.play_circle_fill_rounded, size: 54, color: AppColors.red))
                         else
-                          Image.network(currentMedia, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_outlined, color: AppColors.muted))),
+                          CachedAppImage(
+                            imageUrl: currentMedia,
+                            fit: BoxFit.contain,
+                            errorWidget: const Center(child: Icon(Icons.broken_image_outlined, color: AppColors.muted)),
+                          ),
                         Positioned(
                           left: 12,
                           bottom: 12,
@@ -383,7 +391,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
               if (post == null || post.id == 0) {
                 return const EmptyState(
                   title: 'لم يتم العثور على المنشور',
-                  subtitle: 'افتح المنشور من البروفايل أو المجتمع، أو تأكد أن رقم المنشور موجود في الباك اند.',
+                  subtitle: 'افتح المنشور من البروفايل أو المجتمع، أو تأكد أن المنشور ما زال متاحًا.',
                   icon: Icons.article_outlined,
                 );
               }
