@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
@@ -124,13 +125,15 @@ class ApiClient {
       final response = await http.Response.fromStream(streamed);
       return _parseResponse<T>(response, decoder);
     } on TimeoutException {
-      throw const ApiException(
-        'انتهت مهلة الاتصال بالخادم. تحقق من تشغيل الباك اند.',
-      );
+      throw const ApiException('استغرق الاتصال وقتًا أطول من المتوقع. تحقق من الإنترنت وحاول مرة أخرى.');
+    } on SocketException {
+      throw const ApiException('تعذر الاتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.');
+    } on http.ClientException {
+      throw const ApiException('تعذر الاتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.');
+    } on ApiException {
+      rethrow;
     } catch (_) {
-      throw const ApiException(
-        'تعذر رفع البيانات. تحقق من الاتصال وعنوان API_BASE_URL.',
-      );
+      throw const ApiException('تعذر رفع البيانات حاليًا. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.');
     }
   }
 
@@ -142,15 +145,15 @@ class ApiClient {
       final response = await request();
       return _parseResponse<T>(response, decoder);
     } on TimeoutException {
-      throw const ApiException(
-        'انتهت مهلة الاتصال بالخادم. تحقق من تشغيل الباك اند.',
-      );
+      throw const ApiException('استغرق الاتصال وقتًا أطول من المتوقع. تحقق من الإنترنت وحاول مرة أخرى.');
+    } on SocketException {
+      throw const ApiException('تعذر الاتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.');
+    } on http.ClientException {
+      throw const ApiException('تعذر الاتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.');
     } on ApiException {
       rethrow;
     } catch (_) {
-      throw const ApiException(
-        'تعذر الاتصال بالخادم. تحقق من عنوان API_BASE_URL ومن تشغيل الباك اند.',
-      );
+      throw const ApiException('تعذر الاتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.');
     }
   }
 

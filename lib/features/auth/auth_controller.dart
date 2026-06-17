@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/storage/storage_service.dart';
 import 'auth_service.dart';
+import '../../core/utils/app_snackbar.dart';
 
 class AuthController extends GetxController {
   AuthController(this._service);
@@ -82,7 +83,7 @@ class AuthController extends GetxController {
           'لم تكتمل العملية',
           response.message.isNotEmpty
               ? response.message
-              : 'لم يرجع السيرفر بيانات المستخدم أو التوكن.',
+              : 'تعذر تسجيل الدخول حاليًا. حاول مرة أخرى.',
         );
         return;
       }
@@ -110,7 +111,7 @@ class AuthController extends GetxController {
     try {
       await _service.logout();
     } catch (_) {
-      // حتى لو فشل تسجيل الخروج من السيرفر، نحذف الجلسة محلياً.
+      // حتى لو فشل تسجيل الخروج من الخدمة، نحذف الجلسة محلياً.
     }
 
     await StorageService.clearSession();
@@ -132,15 +133,6 @@ class AuthController extends GetxController {
   }
 
   void _toast(String title, String message) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 14,
-      backgroundColor: Colors.black87,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
-    );
+    AppSnackbar.show(title, message);
   }
 }

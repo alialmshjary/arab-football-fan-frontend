@@ -48,7 +48,7 @@ class _FollowListScreenState extends State<FollowListScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppScreenHeader(
         title: title,
-        subtitle: isFollowers ? 'قائمة المتابعين من الباك اند' : 'قائمة الأشخاص الذين يتابعهم',
+        subtitle: isFollowers ? 'قائمة المتابعين' : 'قائمة الأشخاص الذين يتابعهم',
         leading: IconButton(onPressed: Get.back, icon: const Icon(Icons.arrow_back_ios_new_rounded)),
         actions: [IconButton(onPressed: controller.refreshFollowList, icon: const Icon(Icons.refresh_rounded))],
       ),

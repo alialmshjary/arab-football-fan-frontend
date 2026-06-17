@@ -5,6 +5,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_response.dart';
 import '../../core/widgets/app_chrome.dart';
+import '../../core/utils/app_snackbar.dart';
 import '../matches/match_model.dart';
 import 'prediction_model.dart';
 import 'predictions_service.dart';
@@ -78,11 +79,7 @@ class _MatchPredictionScreenState extends State<MatchPredictionScreen> {
 
       setState(() => isLoading = false);
 
-      Get.snackbar(
-        'تنبيه',
-        e.toString().replaceFirst('Exception: ', ''),
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppSnackbar.show('تنبيه', AppSnackbar.cleanError(e));
     }
   }
 
@@ -90,11 +87,7 @@ class _MatchPredictionScreenState extends State<MatchPredictionScreen> {
     if (match == null || isSaving) return;
 
     if (homeScore < 0 || awayScore < 0) {
-      Get.snackbar(
-        'تنبيه',
-        'لا يمكن أن تكون النتيجة أقل من صفر.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppSnackbar.show('تنبيه', 'لا يمكن أن تكون النتيجة أقل من صفر.');
       return;
     }
 
@@ -114,31 +107,22 @@ class _MatchPredictionScreenState extends State<MatchPredictionScreen> {
         isSaving = false;
       });
 
-      Get.snackbar(
+      AppSnackbar.show(
         'تم',
-        response.message.isNotEmpty
-            ? response.message
-            : 'تم إرسال التوقع بنجاح.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.success.withOpacity(.12),
-        colorText: AppColors.black,
+        response.message.isNotEmpty ? response.message : 'تم إرسال التوقع بنجاح.',
       );
     } on ApiException catch (e) {
       if (!mounted) return;
 
       setState(() => isSaving = false);
 
-      Get.snackbar('خطأ', e.message, snackPosition: SnackPosition.BOTTOM);
+      AppSnackbar.show('خطأ', e.message);
     } catch (e) {
       if (!mounted) return;
 
       setState(() => isSaving = false);
 
-      Get.snackbar(
-        'خطأ',
-        e.toString().replaceFirst('Exception: ', ''),
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppSnackbar.show('خطأ', AppSnackbar.cleanError(e));
     }
   }
 

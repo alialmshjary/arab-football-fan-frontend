@@ -83,7 +83,7 @@ class _ProfileHero extends StatelessWidget {
                                   final currentUserId = StorageService.userId;
 
                                   if (currentUserId == null) {
-                                    Get.snackbar('خطأ', 'يجب تسجيل الدخول أولًا');
+                                    AppSnackbar.show('خطأ', 'يجب تسجيل الدخول أولًا');
                                     return;
                                   }
 
@@ -101,7 +101,7 @@ class _ProfileHero extends StatelessWidget {
                                     },
                                   );
                                 } catch (e) {
-                                  Get.snackbar('خطأ', e.toString());
+                                  AppSnackbar.show('خطأ', AppSnackbar.cleanError(e));
                                 }
                               },
                             ),

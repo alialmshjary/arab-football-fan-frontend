@@ -8,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/widgets/app_chrome.dart';
+import '../../../core/widgets/cached_app_image.dart';
 import '../../chats/widgets/chat_video_fullscreen.dart';
 import '../post_model.dart';
 
@@ -134,21 +135,17 @@ class PostCard extends StatelessWidget {
                       : Colors.white,
                   child: post.isVideo
                       ? _PostVideoPlayer(mediaUrl: mediaUrl)
-                      : Image.network(
-                          mediaUrl,
+                      : CachedAppImage(
+                          imageUrl: mediaUrl,
                           fit: BoxFit.contain,
                           alignment: Alignment.center,
-                          errorBuilder: (_, __, ___) => const _MediaError(),
-                          loadingBuilder: (context, child, progress) {
-                            if (progress == null) return child;
-
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.red,
-                              ),
-                            );
-                          },
+                          placeholder: const Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.red,
+                            ),
+                          ),
+                          errorWidget: const _MediaError(),
                         ),
                 ),
               ),

@@ -13,6 +13,8 @@ import 'fans_controller.dart';
 import 'favorite_player.dart';
 import 'favorite_team.dart';
 import '../../core/storage/storage_service.dart';
+import '../../core/utils/app_snackbar.dart';
+import '../../core/widgets/cached_app_image.dart';
 import '../chats/chat_service.dart';
 part 'widgets/fan_profile_hero.dart';
 part 'widgets/favorite_profile_cards.dart';
@@ -145,7 +147,7 @@ class _FanProfileScreenState extends State<FanProfileScreen> {
           SizedBox(height: 120),
           EmptyState(
             title: 'تعذر تحميل الملف الشخصي',
-            subtitle: 'تأكد من تشغيل الباك اند ثم اسحب للتحديث.',
+            subtitle: 'تعذر تحميل البيانات. تحقق من الاتصال ثم اسحب للتحديث.',
             icon: Icons.person_off_outlined,
           ),
         ],

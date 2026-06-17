@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/widgets/cached_app_image.dart';
+
 class ChatImageFullScreen extends StatelessWidget {
   const ChatImageFullScreen({super.key, required this.imageUrl});
 
@@ -17,22 +19,16 @@ class ChatImageFullScreen extends StatelessWidget {
               child: Hero(
                 tag: imageUrl,
                 child: InteractiveViewer(
-                  child: Image.network(
-                    imageUrl,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-
-                      return const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
-                        Icons.broken_image_outlined,
-                        color: Colors.white,
-                        size: 60,
-                      );
-                    },
+                  child: CachedAppImage(
+                    imageUrl: imageUrl,
+                    placeholder: const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    ),
+                    errorWidget: const Icon(
+                      Icons.broken_image_outlined,
+                      color: Colors.white,
+                      size: 60,
+                    ),
                   ),
                 ),
               ),
