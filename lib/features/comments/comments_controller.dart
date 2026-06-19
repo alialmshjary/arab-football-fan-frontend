@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'comment_model.dart';
 import 'comments_service.dart';
 import '../../core/utils/app_snackbar.dart';
+import '../../core/utils/auth_guard.dart';
 
 class CommentsController extends GetxController {
   CommentsController(this._service);
@@ -29,6 +30,7 @@ class CommentsController extends GetxController {
   }
 
   Future<bool> deleteComment(CommentModel comment) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من حذف التعليق.')) return false;
     if (deletingCommentIds.contains(comment.id)) return false;
 
     final confirm = await Get.dialog<bool>(
@@ -60,6 +62,8 @@ class CommentsController extends GetxController {
   }
 
   Future<bool> addComment(int postId) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من كتابة تعليق.')) return false;
+
     final content = commentController.text.trim();
     if (content.isEmpty) return false;
     isSending.value = true;

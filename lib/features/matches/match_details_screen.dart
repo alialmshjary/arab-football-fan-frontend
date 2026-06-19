@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/widgets/app_chrome.dart';
 import '../../core/widgets/cached_app_image.dart';
 import '../../core/utils/app_snackbar.dart';
+import '../../core/utils/auth_guard.dart';
 import '../chats/chat_service.dart';
 import 'match_model.dart';
 
@@ -112,6 +113,7 @@ class MatchDetailsScreen extends StatelessWidget {
           if (predictionsOpen) ...[
             ElevatedButton.icon(
               onPressed: () {
+                if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من توقع نتيجة المباراة.')) return;
                 Get.toNamed(Routes.matchPrediction, arguments: match);
               },
               icon: const Icon(Icons.sports_score_outlined),
@@ -125,6 +127,8 @@ class MatchDetailsScreen extends StatelessWidget {
 
           ElevatedButton.icon(
             onPressed: () async {
+              if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من دخول شات المباراة.')) return;
+
               try {
                 final chat = await Get.find<ChatService>().getMatchChat(
                   match.id,

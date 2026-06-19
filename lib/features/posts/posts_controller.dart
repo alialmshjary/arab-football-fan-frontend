@@ -10,6 +10,7 @@ import '../fans/fans_controller.dart';
 import 'post_model.dart';
 import 'posts_service.dart';
 import '../../core/utils/app_snackbar.dart';
+import '../../core/utils/auth_guard.dart';
 
 class PostsController extends GetxController {
   PostsController(this._service);
@@ -85,6 +86,8 @@ class PostsController extends GetxController {
   }
 
   Future<void> createPost() async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من إنشاء منشور.')) return;
+
     final path = selectedMediaPath.value;
     if (path == null || path.isEmpty) {
       _toast('تنبيه', 'اختر صورة أو فيديو للمنشور.');
@@ -113,6 +116,7 @@ class PostsController extends GetxController {
   }
 
   Future<bool> updatePost(PostModel post, {required String caption, String? mediaPath}) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من تعديل المنشور.')) return false;
     if (post.fanId != StorageService.userId) return false;
 
     isUpdating.value = true;
@@ -136,6 +140,8 @@ class PostsController extends GetxController {
   }
 
   Future<void> toggleLike(PostModel post) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من الإعجاب بالمنشور.')) return;
+
     final current = _currentPost(post);
     final optimistic = current.copyWith(
       isLiked: !current.isLiked,
@@ -155,6 +161,8 @@ class PostsController extends GetxController {
   }
 
   Future<void> toggleBookmark(PostModel post) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من حفظ المنشور.')) return;
+
     final current = _currentPost(post);
     final optimistic = current.copyWith(
       isBookmarked: !current.isBookmarked,
@@ -174,6 +182,7 @@ class PostsController extends GetxController {
   }
 
   Future<void> deletePost(PostModel post) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من حذف المنشور.')) return;
     if (post.fanId != StorageService.userId) return;
     final confirm = await Get.dialog<bool>(
       AlertDialog(

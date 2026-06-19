@@ -6,6 +6,8 @@ import '../../core/network/api_client.dart';
 import '../../core/network/api_response.dart';
 import '../../core/widgets/app_chrome.dart';
 import '../../core/utils/app_snackbar.dart';
+import '../../core/storage/storage_service.dart';
+import '../../core/utils/auth_guard.dart';
 import '../matches/match_model.dart';
 import 'prediction_model.dart';
 import 'predictions_service.dart';
@@ -55,6 +57,11 @@ class _MatchPredictionScreenState extends State<MatchPredictionScreen> {
       return;
     }
 
+    if (StorageService.isGuest) {
+      setState(() => isLoading = false);
+      return;
+    }
+
     await _loadMyPrediction();
   }
 
@@ -84,6 +91,7 @@ class _MatchPredictionScreenState extends State<MatchPredictionScreen> {
   }
 
   Future<void> _submitPrediction() async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من إرسال التوقع.')) return;
     if (match == null || isSaving) return;
 
     if (homeScore < 0 || awayScore < 0) {
@@ -163,6 +171,42 @@ class _MatchPredictionScreenState extends State<MatchPredictionScreen> {
     }
 
     final isOpen = currentMatch.predictionState.trim() == 'مفتوحة';
+
+    if (StorageService.isGuest) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppScreenHeader(
+          title: 'توقع النتيجة',
+          subtitle: currentMatch.league,
+          leading: IconButton(
+            onPressed: Get.back,
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          ),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: MadrajCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.lock_outline, size: 54, color: AppColors.red),
+                  const SizedBox(height: 12),
+                  const Text('تسجيل الدخول مطلوب', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                  const SizedBox(height: 8),
+                  const Text('يجب عليك تسجيل الدخول أولاً حتى تتمكن من إرسال توقع للمباراة.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.muted, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => AuthGuard.showLoginRequiredDialog(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من إرسال توقع للمباراة.'),
+                    child: const Text('تسجيل الدخول أو إنشاء حساب'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,

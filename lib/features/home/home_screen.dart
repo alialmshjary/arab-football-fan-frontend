@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/app_chrome.dart';
+import '../../core/storage/storage_service.dart';
+import '../../core/utils/auth_guard.dart';
 import '../matches/matches_screen.dart';
 import '../fans/fan_model.dart';
 import '../fans/fan_profile_screen.dart';
@@ -32,7 +34,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onNavTap(int index) {
     if (index == 2) {
+      if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من إنشاء منشور.')) return;
       showCreatePostSheet(context);
+      return;
+    }
+
+    if (StorageService.isGuest && (index == 3 || index == 4)) {
+      AuthGuard.showLoginRequiredDialog(
+        message: index == 3
+            ? 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من مشاهدة المحادثات.'
+            : 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من مشاهدة الملف الشخصي.',
+      );
       return;
     }
     if (index == 4 && Get.isRegistered<FansController>()) {
@@ -48,11 +60,17 @@ class _HomeScreenState extends State<HomeScreen> {
     if (currentIndex == 0) {
       return [
         IconButton(
-          onPressed: () => _showFanSearchSheet(context),
+          onPressed: () {
+            if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من البحث وفتح الملفات الشخصية.')) return;
+            _showFanSearchSheet(context);
+          },
           icon: const Icon(Icons.search_rounded),
         ),
         IconButton(
-          onPressed: () => showCreatePostSheet(context),
+          onPressed: () {
+            if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من إنشاء منشور.')) return;
+            showCreatePostSheet(context);
+          },
           icon: const Icon(Icons.add_circle_outline),
         ),
       ];
@@ -62,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return [
         IconButton(
           onPressed: () {
+            if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من إنشاء محادثة.')) return;
             Get.toNamed(Routes.createGroupChat);
           },
           icon: const Icon(Icons.group_add_outlined),
@@ -100,12 +119,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isGuest = StorageService.isGuest;
     final pages = [
       const PostsScreen(embedded: true),
       const MatchesScreen(),
       const SizedBox.shrink(),
-      const ChatListScreen(),
-      const FanProfileScreen(embedded: true),
+      isGuest
+          ? const _GuestBlockedPage(
+              title: 'المحادثات',
+              message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من مشاهدة المحادثات.',
+              icon: Icons.chat_bubble_outline,
+            )
+          : const ChatListScreen(),
+      isGuest
+          ? const _GuestBlockedPage(
+              title: 'الملف الشخصي',
+              message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من مشاهدة الملف الشخصي.',
+              icon: Icons.person_outline,
+            )
+          : const FanProfileScreen(embedded: true),
     ];
 
     return Scaffold(
@@ -235,6 +267,7 @@ class _FanSearchResultTile extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: ListTile(
         onTap: () {
+          if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من فتح الملفات الشخصية.')) return;
           Get.back<void>();
           Get.toNamed(
             Routes.fanProfile,
@@ -256,6 +289,41 @@ class _FanSearchResultTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         trailing: const Icon(Icons.chevron_left_rounded),
+      ),
+    );
+  }
+}
+
+
+class _GuestBlockedPage extends StatelessWidget {
+  const _GuestBlockedPage({required this.title, required this.message, required this.icon});
+
+  final String title;
+  final String message;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: MadrajCard(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 54, color: AppColors.red),
+              const SizedBox(height: 12),
+              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 8),
+              Text(message, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.muted, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => AuthGuard.showLoginRequiredDialog(message: message),
+                child: const Text('تسجيل الدخول أو إنشاء حساب'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
