@@ -7,6 +7,7 @@ import '../../../app/routes/app_routes.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/storage_service.dart';
+import '../../../core/utils/auth_guard.dart';
 import '../../../core/widgets/app_chrome.dart';
 import '../../../core/widgets/cached_app_image.dart';
 import '../../chats/widgets/chat_video_fullscreen.dart';
@@ -52,8 +53,10 @@ class PostCard extends StatelessWidget {
               child: Row(
                 children: [
                   InkWell(
-                    onTap: () =>
-                        Get.toNamed(Routes.fanProfile, arguments: post.fanId),
+                    onTap: () {
+                      if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من فتح الملفات الشخصية.')) return;
+                      Get.toNamed(Routes.fanProfile, arguments: post.fanId);
+                    },
                     borderRadius: BorderRadius.circular(99),
                     child: AppAvatar(
                       imageUrl: post.fanProfilePicUrl,

@@ -10,6 +10,7 @@ import 'fans_service.dart';
 import 'favorite_player.dart';
 import 'favorite_team.dart';
 import '../../core/utils/app_snackbar.dart';
+import '../../core/utils/auth_guard.dart';
 
 class FansController extends GetxController {
   FansController(this._service);
@@ -66,6 +67,8 @@ class FansController extends GetxController {
   // =========================
 
   Future<void> loadMe() async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من مشاهدة الملف الشخصي.')) return;
+
     final id = currentUserId;
     if (id == null || id == 0) {
       _toast('تنبيه', 'لم يتم العثور على رقم المستخدم في الجلسة.');
@@ -104,6 +107,8 @@ class FansController extends GetxController {
   }
 
   Future<void> updateProfile({String? imagePath}) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من تعديل الملف الشخصي.')) return;
+
     final displayName = displayNameController.text.trim();
     final bio = bioController.text.trim();
 
@@ -253,6 +258,8 @@ class FansController extends GetxController {
   }
 
   Future<void> searchFans(String query) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من البحث عن المستخدمين.')) return;
+
     final text = query.trim();
     searchText.value = text;
 
@@ -316,6 +323,8 @@ class FansController extends GetxController {
   }
 
   Future<void> toggleFollow() async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من متابعة المستخدمين.')) return;
+
     final targetId = profile.value?.id;
     if (targetId == null || targetId == currentUserId) return;
 

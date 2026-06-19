@@ -54,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen>
     _timer = Timer(const Duration(milliseconds: 2100), () {
       if (!mounted) return;
 
-      Get.offAllNamed(StorageService.isLoggedIn ? Routes.home : Routes.auth);
+      Get.offAllNamed(StorageService.canEnterApp ? Routes.home : Routes.auth);
     });
   }
 

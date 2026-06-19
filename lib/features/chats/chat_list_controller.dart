@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../core/storage/storage_service.dart';
 import 'chat_model.dart';
 import 'chat_service.dart';
 
@@ -19,6 +20,13 @@ class ChatListController extends GetxController {
   }
 
   Future<void> fetchChats() async {
+    if (StorageService.isGuest) {
+      chats.clear();
+      errorMessage.value = 'يجب تسجيل الدخول لعرض المحادثات';
+      isLoading.value = false;
+      return;
+    }
+
     try {
       isLoading.value = true;
       errorMessage.value = '';

@@ -21,6 +21,26 @@ class AuthController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  String? _appliedRouteMode;
+
+  @override
+  void onReady() {
+    super.onReady();
+    applyRouteMode();
+  }
+
+  void applyRouteMode() {
+    final args = Get.arguments;
+    final mode = args is Map ? args['mode']?.toString() : null;
+    if (mode == null || mode == _appliedRouteMode) return;
+
+    _appliedRouteMode = mode;
+    if (mode == 'register') {
+      isLogin.value = false;
+    } else if (mode == 'login') {
+      isLogin.value = true;
+    }
+  }
 
   void toggleMode([bool? login]) {
     isLogin.value = login ?? !isLogin.value;
@@ -105,6 +125,12 @@ class AuthController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> continueAsGuest() async {
+    await StorageService.saveGuestSession();
+    _clearFields();
+    Get.offAllNamed(Routes.home);
   }
 
   Future<void> logout() async {
