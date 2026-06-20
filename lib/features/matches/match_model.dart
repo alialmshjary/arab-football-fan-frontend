@@ -80,9 +80,9 @@ class MatchModel {
   static String parsePredictionState(dynamic value) {
     switch ('$value') {
       case '0':
-        return 'مفتوحة';
-      case '1':
         return 'مغلقة';
+      case '1':
+        return 'مفتوحة';
       default:
         return value?.toString() ?? 'غير معروف';
     }

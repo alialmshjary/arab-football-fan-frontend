@@ -14,6 +14,7 @@ import 'favorite_player.dart';
 import 'favorite_team.dart';
 import '../../core/storage/storage_service.dart';
 import '../chats/chat_service.dart';
+import '../reports/report_dialog.dart';
 part 'widgets/fan_profile_hero.dart';
 part 'widgets/favorite_profile_cards.dart';
 part 'widgets/profile_post_grid.dart';
@@ -44,28 +45,37 @@ class _FanProfileScreenState extends State<FanProfileScreen> {
     final body = Obx(_buildBody);
     if (widget.embedded) return body;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppScreenHeader(
-        title: 'الملف الشخصي',
-        showPattern: false,
-        leading: IconButton(
-          onPressed: Get.back,
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () => Get.toNamed(Routes.settings),
-            icon: const Icon(Icons.settings_outlined),
-          ),
-          IconButton(
-            onPressed: controller.refreshCurrent,
-            icon: const Icon(Icons.refresh_rounded),
-          ),
-        ],
-      ),
-      body: body,
-    );
+    return Obx(() {
+      final profile = controller.profile.value;
+      final isOtherProfile = profile != null && !controller.isMyProfile;
+
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: isOtherProfile
+            ? null
+            : AppScreenHeader(
+                title: 'الملف الشخصي',
+                showPattern: false,
+                leading: IconButton(
+                  onPressed: Get.back,
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                ),
+                actions: [
+                  IconButton(
+                    onPressed: () => Get.toNamed(Routes.settings),
+                    icon: const Icon(Icons.settings_outlined),
+                  ),
+                  IconButton(
+                    onPressed: controller.refreshCurrent,
+                    icon: const Icon(Icons.refresh_rounded),
+                  ),
+                ],
+              ),
+        body: isOtherProfile
+            ? SafeArea(top: true, bottom: false, child: body)
+            : body,
+      );
+    });
   }
 
   // تحميل البروفايل بعد بناء الصفحة حتى تكون Get.arguments جاهزة.
@@ -99,7 +109,8 @@ class _FanProfileScreenState extends State<FanProfileScreen> {
 
   FanBasicProfile? _readPreviewFan(Object? value) {
     if (value is FanBasicProfile) return value;
-    if (value is Map) return FanBasicProfile.fromJson(Map<String, dynamic>.from(value));
+    if (value is Map)
+      return FanBasicProfile.fromJson(Map<String, dynamic>.from(value));
     return null;
   }
 
@@ -114,7 +125,9 @@ class _FanProfileScreenState extends State<FanProfileScreen> {
     final player = controller.selectedPlayer.value;
 
     if (controller.isLoading.value && profile == null) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.red));
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.red),
+      );
     }
 
     if (profile == null) return _buildLoadError();
@@ -129,7 +142,10 @@ class _FanProfileScreenState extends State<FanProfileScreen> {
           _ProfileHero(profile: profile, controller: controller),
           _buildFavoritesSection(team, player),
           const SizedBox(height: 6),
-          _ProfilePostsGrid(posts: profile.posts, onOpenPost: controller.openPost),
+          _ProfilePostsGrid(
+            posts: profile.posts,
+            onOpenPost: controller.openPost,
+          ),
         ],
       ),
     );

@@ -14,6 +14,7 @@ import '../fans/fan_model.dart';
 import '../fans/fans_controller.dart';
 import '../comments/comment_model.dart';
 import '../comments/comments_controller.dart';
+import '../reports/report_dialog.dart';
 import 'post_model.dart';
 import 'posts_controller.dart';
 import 'widgets/post_card.dart';
@@ -35,7 +36,9 @@ class _PostsScreenState extends State<PostsScreen> {
     super.initState();
     controller = Get.find<PostsController>();
     if (controller.posts.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => controller.loadFeed());
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => controller.loadFeed(),
+      );
     }
   }
 
@@ -43,7 +46,9 @@ class _PostsScreenState extends State<PostsScreen> {
   Widget build(BuildContext context) {
     final body = Obx(() {
       if (controller.isLoading.value && controller.posts.isEmpty) {
-        return const Center(child: CircularProgressIndicator(color: AppColors.red));
+        return const Center(
+          child: CircularProgressIndicator(color: AppColors.red),
+        );
       }
       if (controller.posts.isEmpty) {
         return RefreshIndicator(
@@ -53,7 +58,12 @@ class _PostsScreenState extends State<PostsScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             children: const [
               SizedBox(height: 160),
-              EmptyState(title: 'لا توجد منشورات من المستخدمين الآخرين', subtitle: 'منشوراتك تظهر في بروفايلك، والمجتمع يعرض منشورات باقي المشجعين فقط.', icon: Icons.groups_2_outlined),
+              EmptyState(
+                title: 'لا توجد منشورات من المستخدمين الآخرين',
+                subtitle:
+                    'منشوراتك تظهر في بروفايلك، والمجتمع يعرض منشورات باقي المشجعين فقط.',
+                icon: Icons.groups_2_outlined,
+              ),
             ],
           ),
         );
@@ -72,7 +82,9 @@ class _PostsScreenState extends State<PostsScreen> {
               onLike: () => controller.toggleLike(post),
               onComment: () => controller.openPost(post),
               onBookmark: () => controller.toggleBookmark(post),
-              onEdit: post.fanId == controller.currentUserId ? () => showEditPostSheet(context, post) : null,
+              onEdit: post.fanId == controller.currentUserId
+                  ? () => showEditPostSheet(context, post)
+                  : null,
               onDelete: () => controller.deletePost(post),
             );
           },
@@ -86,17 +98,25 @@ class _PostsScreenState extends State<PostsScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppScreenHeader(
         title: 'المجتمع',
-        leading: IconButton(onPressed: Get.back, icon: const Icon(Icons.arrow_back_ios_new_rounded)),
+        leading: IconButton(
+          onPressed: Get.back,
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
         actions: [
-          IconButton(onPressed: () => _showFanSearchSheet(context), icon: const Icon(Icons.search_rounded)),
-          IconButton(onPressed: () => showCreatePostSheet(context), icon: const Icon(Icons.add_circle_outline)),
+          IconButton(
+            onPressed: () => _showFanSearchSheet(context),
+            icon: const Icon(Icons.search_rounded),
+          ),
+          IconButton(
+            onPressed: () => showCreatePostSheet(context),
+            icon: const Icon(Icons.add_circle_outline),
+          ),
         ],
       ),
       body: body,
     );
   }
 }
-
 
 void _showFanSearchSheet(BuildContext context) {
   final fansController = Get.find<FansController>();
@@ -105,7 +125,9 @@ void _showFanSearchSheet(BuildContext context) {
     _PostFanSearchSheet(controller: fansController),
     isScrollControlled: true,
     backgroundColor: Theme.of(context).cardColor,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
   );
 }
 
@@ -115,7 +137,9 @@ void showCreatePostSheet(BuildContext context) {
     _CreatePostSheet(controller: controller),
     isScrollControlled: true,
     backgroundColor: Theme.of(context).cardColor,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
   );
 }
 
@@ -125,7 +149,9 @@ void showEditPostSheet(BuildContext context, PostModel post) {
     _EditPostSheet(controller: controller, post: post),
     isScrollControlled: true,
     backgroundColor: Theme.of(context).cardColor,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
   );
 }
 
@@ -139,7 +165,12 @@ class _CreatePostSheet extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(18, 16, 18, MediaQuery.of(context).viewInsets.bottom + 18),
+        padding: EdgeInsets.fromLTRB(
+          18,
+          16,
+          18,
+          MediaQuery.of(context).viewInsets.bottom + 18,
+        ),
         child: Obx(() {
           final path = controller.selectedMediaPath.value;
           return SingleChildScrollView(
@@ -148,10 +179,21 @@ class _CreatePostSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(
-                  child: Container(width: 50, height: 5, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(99))),
+                  child: Container(
+                    width: 50,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 18),
-                const Text('منشور جديد', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20)),
+                const Text(
+                  'منشور جديد',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
+                ),
                 const SizedBox(height: 16),
                 CustomTextField(
                   controller: controller.captionController,
@@ -166,7 +208,9 @@ class _CreatePostSheet extends StatelessWidget {
                   child: Container(
                     height: path == null ? 118 : 220,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF23232A) : AppColors.background,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF23232A)
+                          : AppColors.background,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: Theme.of(context).dividerColor),
                     ),
@@ -174,23 +218,53 @@ class _CreatePostSheet extends StatelessWidget {
                         ? const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.add_photo_alternate_outlined, color: AppColors.red, size: 34),
+                              Icon(
+                                Icons.add_photo_alternate_outlined,
+                                color: AppColors.red,
+                                size: 34,
+                              ),
                               SizedBox(height: 8),
-                              Text('اختر صورة أو فيديو', style: TextStyle(fontWeight: FontWeight.w900)),
+                              Text(
+                                'اختر صورة أو فيديو',
+                                style: TextStyle(fontWeight: FontWeight.w900),
+                              ),
                               SizedBox(height: 4),
-                              Text('يدعم الباك اند الصور والفيديوهات حسب الامتدادات المسموحة', textAlign: TextAlign.center, style: TextStyle(color: AppColors.muted, fontSize: 12)),
+                              Text(
+                                'يدعم الباك اند الصور والفيديوهات حسب الامتدادات المسموحة',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: AppColors.muted,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ],
                           )
                         : ClipRRect(
                             borderRadius: BorderRadius.circular(18),
-                            child: Image.file(File(path), fit: BoxFit.contain, errorBuilder: (_, __, ___) {
-                              return const Center(child: Text('تم اختيار ملف ميديا', style: TextStyle(fontWeight: FontWeight.w900)));
-                            }),
+                            child: Image.file(
+                              File(path),
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) {
+                                return const Center(
+                                  child: Text(
+                                    'تم اختيار ملف ميديا',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                   ),
                 ),
                 const SizedBox(height: 18),
-                CustomButton(label: 'نشر الآن', icon: Icons.send_rounded, isLoading: controller.isCreating.value, onPressed: controller.createPost),
+                CustomButton(
+                  label: 'نشر الآن',
+                  icon: Icons.send_rounded,
+                  isLoading: controller.isCreating.value,
+                  onPressed: controller.createPost,
+                ),
               ],
             ),
           );
@@ -199,7 +273,6 @@ class _CreatePostSheet extends StatelessWidget {
     );
   }
 }
-
 
 class _EditPostSheet extends StatefulWidget {
   const _EditPostSheet({required this.controller, required this.post});
@@ -229,7 +302,11 @@ class _EditPostSheetState extends State<_EditPostSheet> {
   }
 
   Future<void> _save() async {
-    final ok = await widget.controller.updatePost(widget.post, caption: captionController.text, mediaPath: newMediaPath);
+    final ok = await widget.controller.updatePost(
+      widget.post,
+      caption: captionController.text,
+      mediaPath: newMediaPath,
+    );
     if (ok) Get.back<void>();
   }
 
@@ -239,15 +316,33 @@ class _EditPostSheetState extends State<_EditPostSheet> {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(18, 16, 18, MediaQuery.of(context).viewInsets.bottom + 18),
+        padding: EdgeInsets.fromLTRB(
+          18,
+          16,
+          18,
+          MediaQuery.of(context).viewInsets.bottom + 18,
+        ),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(child: Container(width: 50, height: 5, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(99)))),
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
               const SizedBox(height: 18),
-              const Text('تعديل المنشور', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20)),
+              const Text(
+                'تعديل المنشور',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
+              ),
               const SizedBox(height: 16),
               CustomTextField(
                 controller: captionController,
@@ -262,7 +357,9 @@ class _EditPostSheetState extends State<_EditPostSheet> {
                 child: Container(
                   height: 230,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF23232A) : AppColors.background,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF23232A)
+                        : AppColors.background,
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: Theme.of(context).dividerColor),
                   ),
@@ -272,23 +369,64 @@ class _EditPostSheetState extends State<_EditPostSheet> {
                       fit: StackFit.expand,
                       children: [
                         if (newMediaPath != null)
-                          Image.file(File(newMediaPath!), fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Center(child: Text('تم اختيار ملف ميديا', style: TextStyle(fontWeight: FontWeight.w900))))
+                          Image.file(
+                            File(newMediaPath!),
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const Center(
+                              child: Text(
+                                'تم اختيار ملف ميديا',
+                                style: TextStyle(fontWeight: FontWeight.w900),
+                              ),
+                            ),
+                          )
                         else if (widget.post.isVideo)
-                          const Center(child: Icon(Icons.play_circle_fill_rounded, size: 54, color: AppColors.red))
+                          const Center(
+                            child: Icon(
+                              Icons.play_circle_fill_rounded,
+                              size: 54,
+                              color: AppColors.red,
+                            ),
+                          )
                         else
-                          Image.network(currentMedia, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_outlined, color: AppColors.muted))),
+                          Image.network(
+                            currentMedia,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const Center(
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                color: AppColors.muted,
+                              ),
+                            ),
+                          ),
                         Positioned(
                           left: 12,
                           bottom: 12,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(color: Colors.black.withOpacity(.62), borderRadius: BorderRadius.circular(99)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(.62),
+                              borderRadius: BorderRadius.circular(99),
+                            ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: const [
-                                Icon(Icons.add_photo_alternate_outlined, color: Colors.white, size: 18),
+                                Icon(
+                                  Icons.add_photo_alternate_outlined,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
                                 SizedBox(width: 6),
-                                Text('تغيير الميديا', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12)),
+                                Text(
+                                  'تغيير الميديا',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -299,7 +437,14 @@ class _EditPostSheetState extends State<_EditPostSheet> {
                 ),
               ),
               const SizedBox(height: 18),
-              Obx(() => CustomButton(label: 'حفظ التعديل', icon: Icons.check_rounded, isLoading: widget.controller.isUpdating.value, onPressed: _save)),
+              Obx(
+                () => CustomButton(
+                  label: 'حفظ التعديل',
+                  icon: Icons.check_rounded,
+                  isLoading: widget.controller.isUpdating.value,
+                  onPressed: _save,
+                ),
+              ),
             ],
           ),
         ),
@@ -369,8 +514,18 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
       appBar: AppScreenHeader(
         title: 'المنشور',
         subtitle: postId > 0 ? 'تم جلب المنشور برقم #$postId' : null,
-        leading: IconButton(onPressed: Get.back, icon: const Icon(Icons.arrow_back_ios_new_rounded)),
-        actions: [IconButton(onPressed: postId > 0 ? () => postsController.loadPostById(postId) : null, icon: const Icon(Icons.refresh_rounded))],
+        leading: IconButton(
+          onPressed: Get.back,
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+        actions: [
+          IconButton(
+            onPressed: postId > 0
+                ? () => postsController.loadPostById(postId)
+                : null,
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -378,12 +533,15 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
             child: Obx(() {
               final post = postsController.selectedPost.value;
               if (postsController.isPostLoading.value && post == null) {
-                return const Center(child: CircularProgressIndicator(color: AppColors.red));
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.red),
+                );
               }
               if (post == null || post.id == 0) {
                 return const EmptyState(
                   title: 'لم يتم العثور على المنشور',
-                  subtitle: 'افتح المنشور من البروفايل أو المجتمع، أو تأكد أن رقم المنشور موجود في الباك اند.',
+                  subtitle:
+                      'افتح المنشور من البروفايل أو المجتمع، أو تأكد أن رقم المنشور موجود في الباك اند.',
                   icon: Icons.article_outlined,
                 );
               }
@@ -403,31 +561,70 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                       onLike: () => postsController.toggleLike(post),
                       onComment: () {},
                       onBookmark: () => postsController.toggleBookmark(post),
-                      onEdit: post.fanId == postsController.currentUserId ? () => showEditPostSheet(context, post) : null,
+                      onEdit: post.fanId == postsController.currentUserId
+                          ? () => showEditPostSheet(context, post)
+                          : null,
                       onDelete: () => postsController.deletePost(post),
                     ),
                     const Padding(
                       padding: EdgeInsets.fromLTRB(18, 18, 18, 8),
-                      child: Text('التعليقات', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+                      child: Text(
+                        'التعليقات',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
                     ),
                     Obx(() {
                       if (commentsController.isLoading.value) {
-                        return const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: AppColors.red)));
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(24),
+                            child: CircularProgressIndicator(
+                              color: AppColors.red,
+                            ),
+                          ),
+                        );
                       }
                       if (commentsController.comments.isEmpty) {
-                        return const EmptyState(title: 'لا توجد تعليقات', subtitle: 'ابدأ النقاش مع جمهور المدرج.', icon: Icons.mode_comment_outlined);
+                        return const EmptyState(
+                          title: 'لا توجد تعليقات',
+                          subtitle: 'ابدأ النقاش مع جمهور المدرج.',
+                          icon: Icons.mode_comment_outlined,
+                        );
                       }
                       return Column(
                         children: commentsController.comments.map((comment) {
-                          final canDelete = comment.fanId == postsController.currentUserId || post.fanId == postsController.currentUserId;
+                          final isOwnComment =
+                              comment.fanId == postsController.currentUserId;
+                          final isPostOwner =
+                              post.fanId == postsController.currentUserId;
+
+                          final canDelete = isOwnComment || isPostOwner;
+                          final canReport = !isOwnComment;
                           return _CommentTile(
                             comment: comment,
                             canDelete: canDelete,
-                            isDeleting: commentsController.deletingCommentIds.contains(comment.id),
+                            canReport: canReport,
+                            isDeleting: commentsController.deletingCommentIds
+                                .contains(comment.id),
+                            onReport: () {
+                              ReportDialog.show(
+                                targetType: 2,
+                                targetId: comment.id,
+                              );
+                            },
                             onDelete: canDelete
                                 ? () async {
-                                    final deleted = await commentsController.deleteComment(comment);
-                                    if (deleted) await postsController.loadPostById(post.id, seed: post);
+                                    final deleted = await commentsController
+                                        .deleteComment(comment);
+                                    if (deleted) {
+                                      await postsController.loadPostById(
+                                        post.id,
+                                        seed: post,
+                                      );
+                                    }
                                   }
                                 : null,
                           );
@@ -441,7 +638,11 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
           ),
           Obx(() {
             final post = postsController.selectedPost.value;
-            return _CommentInput(postId: post?.id ?? 0, controller: commentsController, postsController: postsController);
+            return _CommentInput(
+              postId: post?.id ?? 0,
+              controller: commentsController,
+              postsController: postsController,
+            );
           }),
         ],
       ),
@@ -450,12 +651,21 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
 }
 
 class _CommentTile extends StatelessWidget {
-  const _CommentTile({required this.comment, required this.canDelete, required this.isDeleting, this.onDelete});
+  const _CommentTile({
+    required this.comment,
+    required this.canDelete,
+    required this.canReport,
+    required this.isDeleting,
+    required this.onReport,
+    this.onDelete,
+  });
 
   final CommentModel comment;
   final bool canDelete;
   final bool isDeleting;
   final VoidCallback? onDelete;
+  final VoidCallback onReport;
+  final bool canReport;
 
   @override
   Widget build(BuildContext context) {
@@ -465,26 +675,78 @@ class _CommentTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppAvatar(imageUrl: comment.fanProfilePic, name: comment.fanName, radius: 18),
+          AppAvatar(
+            imageUrl: comment.fanProfilePic,
+            name: comment.fanName,
+            radius: 18,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(comment.fanName, style: const TextStyle(fontWeight: FontWeight.w900)),
+                Text(
+                  comment.fanName,
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
                 const SizedBox(height: 4),
                 Text(comment.content, style: const TextStyle(height: 1.45)),
               ],
             ),
           ),
-          if (canDelete)
-            IconButton(
-              tooltip: 'حذف التعليق',
-              onPressed: isDeleting ? null : onDelete,
-              icon: isDeleting
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.red))
-                  : const Icon(Icons.delete_outline_rounded, color: AppColors.muted, size: 21),
+          PopupMenuButton<String>(
+            tooltip: 'خيارات التعليق',
+            padding: EdgeInsets.zero,
+            icon: const Icon(
+              Icons.more_vert_rounded,
+              color: AppColors.muted,
+              size: 21,
             ),
+            onSelected: (value) {
+              if (value == 'report') {
+                onReport();
+              } else if (value == 'delete' && onDelete != null) {
+                onDelete!();
+              }
+            },
+            itemBuilder: (context) => [
+              if (canReport)
+                const PopupMenuItem(
+                  value: 'report',
+                  child: Row(
+                    children: [
+                      Icon(Icons.flag_outlined, color: AppColors.red),
+                      SizedBox(width: 8),
+                      Text('إبلاغ عن التعليق'),
+                    ],
+                  ),
+                ),
+              if (canDelete)
+                PopupMenuItem(
+                  value: 'delete',
+                  enabled: !isDeleting,
+                  child: Row(
+                    children: [
+                      isDeleting
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.red,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.delete_outline_rounded,
+                              color: AppColors.muted,
+                            ),
+                      const SizedBox(width: 8),
+                      const Text('حذف التعليق'),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );
@@ -492,7 +754,11 @@ class _CommentTile extends StatelessWidget {
 }
 
 class _CommentInput extends StatelessWidget {
-  const _CommentInput({required this.postId, required this.controller, required this.postsController});
+  const _CommentInput({
+    required this.postId,
+    required this.controller,
+    required this.postsController,
+  });
 
   final int postId;
   final CommentsController controller;
@@ -501,10 +767,21 @@ class _CommentInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(12, 10, 12, MediaQuery.of(context).padding.bottom + 10),
+      padding: EdgeInsets.fromLTRB(
+        12,
+        10,
+        12,
+        MediaQuery.of(context).padding.bottom + 10,
+      ),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(.06), blurRadius: 18, offset: const Offset(0, -4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.06),
+            blurRadius: 18,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -515,8 +792,14 @@ class _CommentInput extends StatelessWidget {
               maxLines: 4,
               decoration: InputDecoration(
                 hintText: 'اكتب تعليقاً...',
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.border)),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
               ),
             ),
           ),
@@ -529,9 +812,19 @@ class _CommentInput extends StatelessWidget {
                       final added = await controller.addComment(postId);
                       if (added) await postsController.loadPostById(postId);
                     },
-              style: IconButton.styleFrom(backgroundColor: AppColors.red, foregroundColor: Colors.white),
+              style: IconButton.styleFrom(
+                backgroundColor: AppColors.red,
+                foregroundColor: Colors.white,
+              ),
               icon: controller.isSending.value
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
                   : const Icon(Icons.send_rounded),
             );
           }),
@@ -556,9 +849,19 @@ class _PostFanSearchSheet extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
           child: Column(
             children: [
-              Container(width: 50, height: 5, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(99))),
+              Container(
+                width: 50,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
               const SizedBox(height: 16),
-              const Text('البحث عن مستخدمين', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+              const Text(
+                'البحث عن مستخدمين',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+              ),
               const SizedBox(height: 14),
               TextField(
                 controller: controller.searchController,
@@ -568,30 +871,53 @@ class _PostFanSearchSheet extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'اكتب اسم المستخدم أو اسم العرض...',
                   prefixIcon: const Icon(Icons.search_rounded),
-                  suffixIcon: Obx(() => controller.isSearching.value
-                      ? const Padding(
-                          padding: EdgeInsets.all(14),
-                          child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.red)),
-                        )
-                      : const SizedBox.shrink()),
+                  suffixIcon: Obx(
+                    () => controller.isSearching.value
+                        ? const Padding(
+                            padding: EdgeInsets.all(14),
+                            child: SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.red,
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
               Expanded(
                 child: Obx(() {
                   if (controller.searchText.value.isEmpty) {
-                    return const EmptyState(title: 'ابدأ بالبحث', subtitle: 'يمكنك البحث عن المشجعين ثم فتح بروفايل أي حساب.', icon: Icons.search_rounded);
+                    return const EmptyState(
+                      title: 'ابدأ بالبحث',
+                      subtitle:
+                          'يمكنك البحث عن المشجعين ثم فتح بروفايل أي حساب.',
+                      icon: Icons.search_rounded,
+                    );
                   }
-                  if (controller.isSearching.value && controller.searchResults.isEmpty) {
-                    return const Center(child: CircularProgressIndicator(color: AppColors.red));
+                  if (controller.isSearching.value &&
+                      controller.searchResults.isEmpty) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: AppColors.red),
+                    );
                   }
                   if (controller.searchResults.isEmpty) {
-                    return const EmptyState(title: 'لا توجد نتائج', subtitle: 'جرّب اسم مستخدم آخر.', icon: Icons.person_search_outlined);
+                    return const EmptyState(
+                      title: 'لا توجد نتائج',
+                      subtitle: 'جرّب اسم مستخدم آخر.',
+                      icon: Icons.person_search_outlined,
+                    );
                   }
                   return ListView.separated(
                     itemCount: controller.searchResults.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) => _PostFanSearchResultTile(fan: controller.searchResults[index]),
+                    itemBuilder: (context, index) => _PostFanSearchResultTile(
+                      fan: controller.searchResults[index],
+                    ),
                   );
                 }),
               ),
@@ -615,11 +941,25 @@ class _PostFanSearchResultTile extends StatelessWidget {
       child: ListTile(
         onTap: () {
           Get.back<void>();
-          Get.toNamed(Routes.fanProfile, arguments: {'fanId': fan.id, 'fan': fan});
+          Get.toNamed(
+            Routes.fanProfile,
+            arguments: {'fanId': fan.id, 'fan': fan},
+          );
         },
-        leading: AppAvatar(imageUrl: fan.profilePicUrl, name: fan.displayName, radius: 22),
-        title: Text(fan.displayName, style: const TextStyle(fontWeight: FontWeight.w900)),
-        subtitle: Text(fan.bio?.trim().isNotEmpty == true ? fan.bio! : 'مشجع في مجتمع مدرج', maxLines: 1, overflow: TextOverflow.ellipsis),
+        leading: AppAvatar(
+          imageUrl: fan.profilePicUrl,
+          name: fan.displayName,
+          radius: 22,
+        ),
+        title: Text(
+          fan.displayName,
+          style: const TextStyle(fontWeight: FontWeight.w900),
+        ),
+        subtitle: Text(
+          fan.bio?.trim().isNotEmpty == true ? fan.bio! : 'مشجع في مجتمع مدرج',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         trailing: const Icon(Icons.chevron_left_rounded),
       ),
     );

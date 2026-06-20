@@ -8,6 +8,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/widgets/app_chrome.dart';
 import '../post_model.dart';
+import '../../reports/report_dialog.dart';
 
 class PostCard extends StatelessWidget {
   const PostCard({
@@ -48,18 +49,36 @@ class PostCard extends StatelessWidget {
               child: Row(
                 children: [
                   InkWell(
-                    onTap: () => Get.toNamed(Routes.fanProfile, arguments: post.fanId),
+                    onTap: () =>
+                        Get.toNamed(Routes.fanProfile, arguments: post.fanId),
                     borderRadius: BorderRadius.circular(99),
-                    child: AppAvatar(imageUrl: post.fanProfilePicUrl, name: post.fanDisplayName, radius: 22),
+                    child: AppAvatar(
+                      imageUrl: post.fanProfilePicUrl,
+                      name: post.fanDisplayName,
+                      radius: 22,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(post.fanDisplayName, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
+                        Text(
+                          post.fanDisplayName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                          ),
+                        ),
                         const SizedBox(height: 2),
-                        Text(_formatDate(post.createdAt), style: const TextStyle(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w600)),
+                        Text(
+                          _formatDate(post.createdAt),
+                          style: const TextStyle(
+                            color: AppColors.muted,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -71,14 +90,41 @@ class PostCard extends StatelessWidget {
                           IconButton(
                             tooltip: 'تعديل المنشور',
                             onPressed: onEdit,
-                            icon: const Icon(Icons.edit_outlined, color: AppColors.red),
+                            icon: const Icon(
+                              Icons.edit_outlined,
+                              color: AppColors.red,
+                            ),
                           ),
                         if (onDelete != null)
                           IconButton(
                             tooltip: 'حذف المنشور',
                             onPressed: onDelete,
-                            icon: const Icon(Icons.delete_outline_rounded, color: AppColors.muted),
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: AppColors.muted,
+                            ),
                           ),
+                      ],
+                    )
+                  else
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: AppColors.muted),
+                      onSelected: (value) {
+                        if (value == 'report') {
+                          ReportDialog.show(targetType: 1, targetId: post.id);
+                        }
+                      },
+                      itemBuilder: (context) => const [
+                        PopupMenuItem(
+                          value: 'report',
+                          child: Row(
+                            children: [
+                              Icon(Icons.flag_outlined, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('إبلاغ'),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                 ],
@@ -87,14 +133,22 @@ class PostCard extends StatelessWidget {
             if (post.caption?.trim().isNotEmpty == true)
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-                child: Text(post.caption!, style: const TextStyle(fontWeight: FontWeight.w700, height: 1.45)),
+                child: Text(
+                  post.caption!,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    height: 1.45,
+                  ),
+                ),
               ),
             ClipRRect(
               borderRadius: BorderRadius.zero,
               child: AspectRatio(
                 aspectRatio: 1,
                 child: Container(
-                  color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF141419) : Colors.white,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF141419)
+                      : Colors.white,
                   child: post.isVideo
                       ? _VideoPlaceholder(mediaUrl: mediaUrl)
                       : Image.network(
@@ -104,7 +158,12 @@ class PostCard extends StatelessWidget {
                           errorBuilder: (_, __, ___) => const _MediaError(),
                           loadingBuilder: (context, child, progress) {
                             if (progress == null) return child;
-                            return const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.red));
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.red,
+                              ),
+                            );
                           },
                         ),
                 ),
@@ -114,10 +173,26 @@ class PostCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
               child: Row(
                 children: [
-                  _PostAction(icon: post.isLiked ? Icons.favorite : Icons.favorite_border, label: _compactNumber(post.likeCount), active: post.isLiked, onTap: onLike),
-                  _PostAction(icon: Icons.mode_comment_outlined, label: _compactNumber(post.commentCount), onTap: onComment),
+                  _PostAction(
+                    icon: post.isLiked ? Icons.favorite : Icons.favorite_border,
+                    label: _compactNumber(post.likeCount),
+                    active: post.isLiked,
+                    onTap: onLike,
+                  ),
+                  _PostAction(
+                    icon: Icons.mode_comment_outlined,
+                    label: _compactNumber(post.commentCount),
+                    onTap: onComment,
+                  ),
                   const Spacer(),
-                  _PostAction(icon: post.isBookmarked ? Icons.bookmark : Icons.bookmark_border, label: _compactNumber(post.bookmarkCount), active: post.isBookmarked, onTap: onBookmark),
+                  _PostAction(
+                    icon: post.isBookmarked
+                        ? Icons.bookmark
+                        : Icons.bookmark_border,
+                    label: _compactNumber(post.bookmarkCount),
+                    active: post.isBookmarked,
+                    onTap: onBookmark,
+                  ),
                 ],
               ),
             ),
@@ -145,7 +220,12 @@ class PostCard extends StatelessWidget {
 }
 
 class _PostAction extends StatelessWidget {
-  const _PostAction({required this.icon, required this.label, required this.onTap, this.active = false});
+  const _PostAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.active = false,
+  });
 
   final IconData icon;
   final String label;
@@ -161,9 +241,24 @@ class _PostAction extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Row(
           children: [
-            Icon(icon, size: 21, color: active ? AppColors.red : Theme.of(context).textTheme.bodyLarge?.color),
+            Icon(
+              icon,
+              size: 21,
+              color: active
+                  ? AppColors.red
+                  : Theme.of(context).textTheme.bodyLarge?.color,
+            ),
             const SizedBox(width: 4),
-            Text(label, style: TextStyle(color: active ? AppColors.red : Theme.of(context).textTheme.bodyLarge?.color, fontSize: 12, fontWeight: FontWeight.w800)),
+            Text(
+              label,
+              style: TextStyle(
+                color: active
+                    ? AppColors.red
+                    : Theme.of(context).textTheme.bodyLarge?.color,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ],
         ),
       ),
@@ -186,7 +281,13 @@ class _VideoPlaceholder extends StatelessWidget {
           children: const [
             Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 58),
             SizedBox(height: 8),
-            Text('فيديو', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+            Text(
+              'فيديو',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ],
         ),
       ),
@@ -200,7 +301,9 @@ class _MediaError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF23232A) : AppColors.background,
+      color: Theme.of(context).brightness == Brightness.dark
+          ? const Color(0xFF23232A)
+          : AppColors.background,
       child: const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
