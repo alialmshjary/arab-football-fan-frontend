@@ -64,25 +64,92 @@ class MatchModel {
   String get formattedTime =>
       '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
 
+  DateTime? get startDateTime {
+    try {
+      final parts = matchDate.split('-');
+
+      if (parts.length != 3) return null;
+
+      final year = int.tryParse(parts[0]);
+      final month = int.tryParse(parts[1]);
+      final day = int.tryParse(parts[2]);
+
+      if (year == null || month == null || day == null) return null;
+
+      var h = hour;
+
+      final normalizedPeriod = period.trim();
+
+      if (normalizedPeriod.contains('مساء') ||
+          normalizedPeriod.toLowerCase() == 'pm') {
+        if (h < 12) h += 12;
+      }
+
+      if (normalizedPeriod.contains('صباح') ||
+          normalizedPeriod.toLowerCase() == 'am') {
+        if (h == 12) h = 0;
+      }
+
+      return DateTime(year, month, day, h, minute);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool get hasStarted {
+    final start = startDateTime;
+
+    if (start == null) return false;
+
+    return !DateTime.now().isBefore(start);
+  }
+
+  bool get predictionsOpen {
+    return predictionState.trim() == 'مفتوحة' && !hasStarted;
+  }
+
+  String get effectivePredictionState {
+    return predictionsOpen ? 'مفتوحة' : 'مغلقة';
+  }
+
   static String parseStatus(dynamic value) {
-    switch ('$value') {
+    final text = value?.toString().trim().toLowerCase();
+
+    switch (text) {
       case '0':
+      case 'upcoming':
+      case 'قادمة':
         return 'قادمة';
+
       case '1':
+      case 'live':
+      case 'مباشرة':
         return 'مباشرة';
+
       case '2':
+      case 'finished':
+      case 'منتهية':
         return 'منتهية';
+
       default:
         return value?.toString() ?? 'غير معروف';
     }
   }
 
   static String parsePredictionState(dynamic value) {
-    switch ('$value') {
+    final text = value?.toString().trim().toLowerCase();
+
+    switch (text) {
       case '0':
+      case 'closed':
+      case 'مغلقة':
         return 'مغلقة';
+
       case '1':
+      case 'open':
+      case 'مفتوحة':
         return 'مفتوحة';
+
       default:
         return value?.toString() ?? 'غير معروف';
     }

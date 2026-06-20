@@ -6,6 +6,7 @@ import '../../app/routes/app_routes.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/storage/storage_service.dart';
 import '../../core/widgets/app_chrome.dart';
+import '../../core/utils/app_snackbar.dart';
 import '../auth/auth_controller.dart';
 import '../auth/auth_service.dart';
 import '../fans/fans_controller.dart';
@@ -35,16 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _copyUserId(String id) async {
     if (id.trim().isEmpty || id == 'غير متوفر') return;
     await Clipboard.setData(ClipboardData(text: id));
-    Get.snackbar(
-      'تم النسخ',
-      'تم نسخ ID المستخدم.',
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 14,
-      backgroundColor: Colors.black87,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 2),
-    );
+    AppSnackbar.show('تم النسخ', 'تم نسخ ID المستخدم.');
   }
 
   Future<void> _logout() async {

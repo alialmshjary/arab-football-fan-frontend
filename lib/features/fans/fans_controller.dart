@@ -3,11 +3,14 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/storage/storage_service.dart';
+import '../../core/media/media_compressor.dart';
 import '../posts/post_model.dart';
 import 'fan_model.dart';
 import 'fans_service.dart';
 import 'favorite_player.dart';
 import 'favorite_team.dart';
+import '../../core/utils/app_snackbar.dart';
+import '../../core/utils/auth_guard.dart';
 
 class FansController extends GetxController {
   FansController(this._service);
@@ -64,6 +67,8 @@ class FansController extends GetxController {
   // =========================
 
   Future<void> loadMe() async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من مشاهدة الملف الشخصي.')) return;
+
     final id = currentUserId;
     if (id == null || id == 0) {
       _toast('تنبيه', 'لم يتم العثور على رقم المستخدم في الجلسة.');
@@ -102,6 +107,8 @@ class FansController extends GetxController {
   }
 
   Future<void> updateProfile({String? imagePath}) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من تعديل الملف الشخصي.')) return;
+
     final displayName = displayNameController.text.trim();
     final bio = bioController.text.trim();
 
@@ -133,7 +140,9 @@ class FansController extends GetxController {
   Future<void> pickAndUpdateImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 86);
     if (image == null) return;
-    await updateProfile(imagePath: image.path);
+
+    final compressedPath = await MediaCompressor.compressImage(image.path);
+    await updateProfile(imagePath: compressedPath);
   }
 
   void _prepareProfileForLoading(int fanId, FanBasicProfile? preview) {
@@ -249,6 +258,8 @@ class FansController extends GetxController {
   }
 
   Future<void> searchFans(String query) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من البحث عن المستخدمين.')) return;
+
     final text = query.trim();
     searchText.value = text;
 
@@ -312,6 +323,8 @@ class FansController extends GetxController {
   }
 
   Future<void> toggleFollow() async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من متابعة المستخدمين.')) return;
+
     final targetId = profile.value?.id;
     if (targetId == null || targetId == currentUserId) return;
 
@@ -353,19 +366,10 @@ class FansController extends GetxController {
   // أدوات مساعدة
   // =========================
 
-  String _cleanError(Object error) => error.toString().replaceFirst('Exception: ', '');
+  String _cleanError(Object error) => AppSnackbar.cleanError(error);
 
   void _toast(String title, String message) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 14,
-      backgroundColor: Colors.black87,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
-    );
+    AppSnackbar.show(title, message);
   }
 
   @override

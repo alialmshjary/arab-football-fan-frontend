@@ -65,10 +65,10 @@ class _ProfilePostThumb extends StatelessWidget {
                 ? Container(color: AppColors.black, child: const Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 34))
                 : Container(
                     color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF141419) : Colors.white,
-                    child: Image.network(
-                      mediaUrl,
+                    child: CachedAppImage(
+                      imageUrl: mediaUrl,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => Container(color: AppColors.border, child: const Icon(Icons.image_not_supported_outlined)),
+                      errorWidget: Container(color: AppColors.border, child: const Icon(Icons.image_not_supported_outlined)),
                     ),
                   ),
             Positioned(

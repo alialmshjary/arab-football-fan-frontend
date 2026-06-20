@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 
 import 'comment_model.dart';
 import 'comments_service.dart';
+import '../../core/utils/app_snackbar.dart';
+import '../../core/utils/auth_guard.dart';
 
 class CommentsController extends GetxController {
   CommentsController(this._service);
@@ -28,6 +30,7 @@ class CommentsController extends GetxController {
   }
 
   Future<bool> deleteComment(CommentModel comment) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من حذف التعليق.')) return false;
     if (deletingCommentIds.contains(comment.id)) return false;
 
     final confirm = await Get.dialog<bool>(
@@ -59,6 +62,8 @@ class CommentsController extends GetxController {
   }
 
   Future<bool> addComment(int postId) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من كتابة تعليق.')) return false;
+
     final content = commentController.text.trim();
     if (content.isEmpty) return false;
     isSending.value = true;
@@ -76,19 +81,10 @@ class CommentsController extends GetxController {
     }
   }
 
-  String _cleanError(Object error) => error.toString().replaceFirst('Exception: ', '');
+  String _cleanError(Object error) => AppSnackbar.cleanError(error);
 
   void _toast(String title, String message) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 14,
-      backgroundColor: Colors.black87,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
-    );
+    AppSnackbar.show(title, message);
   }
 
   @override

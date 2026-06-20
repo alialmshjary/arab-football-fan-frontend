@@ -20,4 +20,5 @@ class ApiConstants {
   static const String chatMembers = '/api/ChatMembers';
   static const String messages = '/api/Message';
   static const String reports = '/api/Reports';
+  static const String predictions = '/api/Predictions';
 }

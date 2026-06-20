@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../constants/app_assets.dart';
 import '../constants/app_colors.dart';
 import '../network/api_client.dart';
+import 'cached_app_image.dart';
 
 class SaduStrip extends StatelessWidget {
   const SaduStrip({super.key, this.height = 22});
@@ -207,7 +209,7 @@ class AppAvatar extends StatelessWidget {
       child: CircleAvatar(
         radius: radius,
         backgroundColor: AppColors.black,
-        backgroundImage: url.isEmpty ? null : NetworkImage(url),
+        backgroundImage: url.isEmpty ? null : CachedNetworkImageProvider(url),
         onBackgroundImageError: url.isEmpty ? null : (_, __) {},
         child: url.isEmpty
             ? Text(letter, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: radius * .8))
@@ -249,20 +251,17 @@ class TeamBadge extends StatelessWidget {
           ? _fallbackBadge()
           : ClipRRect(
               borderRadius: BorderRadius.circular(size * .18),
-              child: Image.network(
-                logoUrl,
+              child: CachedAppImage(
+                imageUrl: logoUrl,
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => _fallbackBadge(),
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return Center(
-                    child: SizedBox(
-                      width: size * .34,
-                      height: size * .34,
-                      child: const CircularProgressIndicator(strokeWidth: 2, color: AppColors.red),
-                    ),
-                  );
-                },
+                placeholder: Center(
+                  child: SizedBox(
+                    width: size * .34,
+                    height: size * .34,
+                    child: const CircularProgressIndicator(strokeWidth: 2, color: AppColors.red),
+                  ),
+                ),
+                errorWidget: _fallbackBadge(),
               ),
             ),
     );

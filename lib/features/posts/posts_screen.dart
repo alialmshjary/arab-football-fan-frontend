@@ -6,7 +6,11 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/network/api_client.dart';
+import '../../core/media/media_compressor.dart';
+import '../../core/storage/storage_service.dart';
+import '../../core/utils/auth_guard.dart';
 import '../../core/widgets/app_chrome.dart';
+import '../../core/widgets/cached_app_image.dart';
 import '../../core/widgets/custom_button.dart';
 import '../../core/widgets/custom_text_field.dart';
 import '../../app/routes/app_routes.dart';
@@ -104,11 +108,25 @@ class _PostsScreenState extends State<PostsScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () => _showFanSearchSheet(context),
+            onPressed: () {
+              if (!AuthGuard.requireLogin(
+                message:
+                    'يجب عليك تسجيل الدخول أولاً حتى تتمكن من البحث وفتح الملفات الشخصية.',
+              ))
+                return;
+              _showFanSearchSheet(context);
+            },
             icon: const Icon(Icons.search_rounded),
           ),
           IconButton(
-            onPressed: () => showCreatePostSheet(context),
+            onPressed: () {
+              if (!AuthGuard.requireLogin(
+                message:
+                    'يجب عليك تسجيل الدخول أولاً حتى تتمكن من إنشاء منشور.',
+              ))
+                return;
+              showCreatePostSheet(context);
+            },
             icon: const Icon(Icons.add_circle_outline),
           ),
         ],
@@ -119,6 +137,11 @@ class _PostsScreenState extends State<PostsScreen> {
 }
 
 void _showFanSearchSheet(BuildContext context) {
+  if (!AuthGuard.requireLogin(
+    message:
+        'يجب عليك تسجيل الدخول أولاً حتى تتمكن من البحث وفتح الملفات الشخصية.',
+  ))
+    return;
   final fansController = Get.find<FansController>();
   fansController.clearSearch();
   Get.bottomSheet(
@@ -132,6 +155,10 @@ void _showFanSearchSheet(BuildContext context) {
 }
 
 void showCreatePostSheet(BuildContext context) {
+  if (!AuthGuard.requireLogin(
+    message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من إنشاء منشور.',
+  ))
+    return;
   final controller = Get.find<PostsController>();
   Get.bottomSheet(
     _CreatePostSheet(controller: controller),
@@ -230,7 +257,7 @@ class _CreatePostSheet extends StatelessWidget {
                               ),
                               SizedBox(height: 4),
                               Text(
-                                'يدعم الباك اند الصور والفيديوهات حسب الامتدادات المسموحة',
+                                'يدعم التطبيق الصور والفيديوهات بالامتدادات المسموحة',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: AppColors.muted,
@@ -298,7 +325,9 @@ class _EditPostSheetState extends State<_EditPostSheet> {
     final picker = ImagePicker();
     final media = await picker.pickMedia(imageQuality: 86);
     if (media == null) return;
-    setState(() => newMediaPath = media.path);
+
+    final compressedPath = await MediaCompressor.compressMedia(media.path);
+    setState(() => newMediaPath = compressedPath);
   }
 
   Future<void> _save() async {
@@ -388,10 +417,10 @@ class _EditPostSheetState extends State<_EditPostSheet> {
                             ),
                           )
                         else
-                          Image.network(
-                            currentMedia,
+                          CachedAppImage(
+                            imageUrl: currentMedia,
                             fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Center(
+                            errorWidget: const Center(
                               child: Icon(
                                 Icons.broken_image_outlined,
                                 color: AppColors.muted,
@@ -513,7 +542,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppScreenHeader(
         title: 'المنشور',
-        subtitle: postId > 0 ? 'تم جلب المنشور برقم #$postId' : null,
+        subtitle: null,
         leading: IconButton(
           onPressed: Get.back,
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -541,7 +570,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                 return const EmptyState(
                   title: 'لم يتم العثور على المنشور',
                   subtitle:
-                      'افتح المنشور من البروفايل أو المجتمع، أو تأكد أن رقم المنشور موجود في الباك اند.',
+                      'افتح المنشور من البروفايل أو المجتمع، أو تأكد أن المنشور ما زال متاحًا.',
                   icon: Icons.article_outlined,
                 );
               }
@@ -766,6 +795,41 @@ class _CommentInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (StorageService.isGuest) {
+      return InkWell(
+        onTap: () => AuthGuard.showLoginRequiredDialog(
+          message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من كتابة تعليق.',
+        ),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.fromLTRB(
+            16,
+            14,
+            16,
+            MediaQuery.of(context).padding.bottom + 14,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(.06),
+                blurRadius: 18,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: const Text(
+            'سجل دخولك للتعليق على المنشور',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.muted,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
       padding: EdgeInsets.fromLTRB(
         12,
@@ -940,6 +1004,11 @@ class _PostFanSearchResultTile extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: ListTile(
         onTap: () {
+          if (!AuthGuard.requireLogin(
+            message:
+                'يجب عليك تسجيل الدخول أولاً حتى تتمكن من فتح الملفات الشخصية.',
+          ))
+            return;
           Get.back<void>();
           Get.toNamed(
             Routes.fanProfile,

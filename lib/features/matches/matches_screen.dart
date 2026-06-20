@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/app_chrome.dart';
+import '../../core/widgets/cached_app_image.dart';
 import '../../core/widgets/custom_text_field.dart';
 import '../../core/widgets/loading_widget.dart';
 import 'match_model.dart';
@@ -236,17 +237,15 @@ class _TeamName extends StatelessWidget {
           backgroundColor: AppColors.background,
           child: logoUrl != null
               ? ClipOval(
-                  child: Image.network(
-                    fullLogoUrl,
+                  child: CachedAppImage(
+                    imageUrl: fullLogoUrl,
                     width: 36,
                     height: 36,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) {
-                      return const Icon(
-                        Icons.shield_outlined,
-                        color: AppColors.black,
-                      );
-                    },
+                    errorWidget: const Icon(
+                      Icons.shield_outlined,
+                      color: AppColors.black,
+                    ),
                   ),
                 )
               : const Icon(Icons.shield_outlined, color: AppColors.black),

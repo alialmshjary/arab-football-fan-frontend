@@ -5,9 +5,12 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/storage/storage_service.dart';
+import '../../core/media/media_compressor.dart';
 import '../fans/fans_controller.dart';
 import 'post_model.dart';
 import 'posts_service.dart';
+import '../../core/utils/app_snackbar.dart';
+import '../../core/utils/auth_guard.dart';
 
 class PostsController extends GetxController {
   PostsController(this._service);
@@ -77,10 +80,14 @@ class PostsController extends GetxController {
     final picker = ImagePicker();
     final media = await picker.pickMedia(imageQuality: 86);
     if (media == null) return;
-    selectedMediaPath.value = media.path;
+
+    final compressedPath = await MediaCompressor.compressMedia(media.path);
+    selectedMediaPath.value = compressedPath;
   }
 
   Future<void> createPost() async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من إنشاء منشور.')) return;
+
     final path = selectedMediaPath.value;
     if (path == null || path.isEmpty) {
       _toast('تنبيه', 'اختر صورة أو فيديو للمنشور.');
@@ -109,6 +116,7 @@ class PostsController extends GetxController {
   }
 
   Future<bool> updatePost(PostModel post, {required String caption, String? mediaPath}) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من تعديل المنشور.')) return false;
     if (post.fanId != StorageService.userId) return false;
 
     isUpdating.value = true;
@@ -132,6 +140,8 @@ class PostsController extends GetxController {
   }
 
   Future<void> toggleLike(PostModel post) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من الإعجاب بالمنشور.')) return;
+
     final current = _currentPost(post);
     final optimistic = current.copyWith(
       isLiked: !current.isLiked,
@@ -151,6 +161,8 @@ class PostsController extends GetxController {
   }
 
   Future<void> toggleBookmark(PostModel post) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من حفظ المنشور.')) return;
+
     final current = _currentPost(post);
     final optimistic = current.copyWith(
       isBookmarked: !current.isBookmarked,
@@ -170,6 +182,7 @@ class PostsController extends GetxController {
   }
 
   Future<void> deletePost(PostModel post) async {
+    if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من حذف المنشور.')) return;
     if (post.fanId != StorageService.userId) return;
     final confirm = await Get.dialog<bool>(
       AlertDialog(
@@ -227,24 +240,16 @@ class PostsController extends GetxController {
     }
   }
 
-  String _cleanError(Object error) => error.toString().replaceFirst('Exception: ', '');
+  String _cleanError(Object error) => AppSnackbar.cleanError(error);
 
   void _toast(String title, String message) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 14,
-      backgroundColor: Colors.black87,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
-    );
+    AppSnackbar.show(title, message);
   }
 
   @override
   void onClose() {
     captionController.dispose();
+    MediaCompressor.clearTempVideos();
     super.onClose();
   }
 }

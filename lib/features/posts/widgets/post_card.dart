@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../../app/routes/app_routes.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/storage_service.dart';
+import '../../../core/utils/auth_guard.dart';
 import '../../../core/widgets/app_chrome.dart';
+import '../../../core/widgets/cached_app_image.dart';
+import '../../chats/widgets/chat_video_fullscreen.dart';
 import '../post_model.dart';
 import '../../reports/report_dialog.dart';
 
@@ -35,6 +39,7 @@ class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaUrl = ApiClient.mediaUrl(post.mediaUrl);
+
     return MadrajCard(
       margin: const EdgeInsets.fromLTRB(14, 10, 14, 4),
       padding: EdgeInsets.zero,
@@ -49,8 +54,15 @@ class PostCard extends StatelessWidget {
               child: Row(
                 children: [
                   InkWell(
+<<<<<<< HEAD
                     onTap: () =>
                         Get.toNamed(Routes.fanProfile, arguments: post.fanId),
+=======
+                    onTap: () {
+                      if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من فتح الملفات الشخصية.')) return;
+                      Get.toNamed(Routes.fanProfile, arguments: post.fanId);
+                    },
+>>>>>>> 3f65aba7d3a5de726ea1ed17f5f5a21c1e487d14
                     borderRadius: BorderRadius.circular(99),
                     child: AppAvatar(
                       imageUrl: post.fanProfilePicUrl,
@@ -130,6 +142,7 @@ class PostCard extends StatelessWidget {
                 ],
               ),
             ),
+
             if (post.caption?.trim().isNotEmpty == true)
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
@@ -141,6 +154,7 @@ class PostCard extends StatelessWidget {
                   ),
                 ),
               ),
+
             ClipRRect(
               borderRadius: BorderRadius.zero,
               child: AspectRatio(
@@ -150,11 +164,12 @@ class PostCard extends StatelessWidget {
                       ? const Color(0xFF141419)
                       : Colors.white,
                   child: post.isVideo
-                      ? _VideoPlaceholder(mediaUrl: mediaUrl)
-                      : Image.network(
-                          mediaUrl,
+                      ? _PostVideoPlayer(mediaUrl: mediaUrl)
+                      : CachedAppImage(
+                          imageUrl: mediaUrl,
                           fit: BoxFit.contain,
                           alignment: Alignment.center,
+<<<<<<< HEAD
                           errorBuilder: (_, __, ___) => const _MediaError(),
                           loadingBuilder: (context, child, progress) {
                             if (progress == null) return child;
@@ -165,10 +180,20 @@ class PostCard extends StatelessWidget {
                               ),
                             );
                           },
+=======
+                          placeholder: const Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.red,
+                            ),
+                          ),
+                          errorWidget: const _MediaError(),
+>>>>>>> 3f65aba7d3a5de726ea1ed17f5f5a21c1e487d14
                         ),
                 ),
               ),
             ),
+
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
               child: Row(
@@ -205,17 +230,235 @@ class PostCard extends StatelessWidget {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final diff = now.difference(date.toLocal());
+
     if (diff.inMinutes < 1) return 'الآن';
     if (diff.inHours < 1) return 'منذ ${diff.inMinutes} د';
     if (diff.inDays < 1) return 'منذ ${diff.inHours} س';
     if (diff.inDays < 7) return 'منذ ${diff.inDays} ي';
+
     return DateFormat('yyyy/MM/dd').format(date.toLocal());
   }
 
   String _compactNumber(int value) {
-    if (value >= 1000000) return '${(value / 1000000).toStringAsFixed(1)}M';
-    if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)}K';
+    if (value >= 1000000) {
+      return '${(value / 1000000).toStringAsFixed(1)}M';
+    }
+
+    if (value >= 1000) {
+      return '${(value / 1000).toStringAsFixed(1)}K';
+    }
+
     return value.toString();
+  }
+}
+
+class _PostVideoPlayer extends StatefulWidget {
+  const _PostVideoPlayer({required this.mediaUrl});
+
+  final String mediaUrl;
+
+  @override
+  State<_PostVideoPlayer> createState() => _PostVideoPlayerState();
+}
+
+class _PostVideoPlayerState extends State<_PostVideoPlayer> {
+  VideoPlayerController? _controller;
+
+  bool _initialized = false;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    try {
+      final controller = VideoPlayerController.networkUrl(
+        Uri.parse(widget.mediaUrl),
+      );
+
+      _controller = controller;
+
+      await controller.initialize();
+
+      if (!mounted) return;
+
+      setState(() {
+        _initialized = true;
+      });
+    } catch (e) {
+      debugPrint('POST VIDEO ERROR = $e');
+
+      if (!mounted) return;
+
+      setState(() {
+        _hasError = true;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    final controller = _controller;
+
+    if (controller != null) {
+      controller.pause();
+      controller.dispose();
+    }
+
+    super.dispose();
+  }
+
+  void _togglePlay() {
+    final controller = _controller;
+
+    if (!_initialized || _hasError || controller == null) return;
+
+    if (controller.value.isPlaying) {
+      controller.pause();
+    } else {
+      controller.play();
+    }
+  }
+
+  void _openFullScreen() {
+    if (!_initialized || _hasError) return;
+
+    Get.to(() => ChatVideoFullScreen(videoUrl: widget.mediaUrl));
+  }
+
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds % 60;
+
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = _controller;
+
+    if (_hasError) {
+      return Container(
+        color: AppColors.black,
+        child: const Center(
+          child: Text(
+            'تعذر تشغيل الفيديو',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+          ),
+        ),
+      );
+    }
+
+    if (!_initialized || controller == null) {
+      return Container(
+        color: AppColors.black,
+        child: const Center(
+          child: CircularProgressIndicator(color: AppColors.red),
+        ),
+      );
+    }
+
+    return Container(
+      color: AppColors.black,
+      child: ValueListenableBuilder<VideoPlayerValue>(
+        valueListenable: controller,
+        builder: (context, value, child) {
+          final position = value.position;
+          final duration = value.duration;
+          final size = value.size;
+
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned.fill(
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: SizedBox(
+                    width: size.width,
+                    height: size.height,
+                    child: VideoPlayer(controller),
+                  ),
+                ),
+              ),
+
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: _togglePlay,
+                  onDoubleTap: _openFullScreen,
+                  child: Container(
+                    color: Colors.black.withOpacity(
+                      value.isPlaying ? 0.04 : 0.18,
+                    ),
+                    child: Center(
+                      child: AnimatedOpacity(
+                        opacity: value.isPlaying ? 0.0 : 1.0,
+                        duration: const Duration(milliseconds: 180),
+                        child: const Icon(
+                          Icons.play_circle_fill_rounded,
+                          size: 64,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              Positioned(
+                left: 10,
+                right: 10,
+                bottom: 10,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    VideoProgressIndicator(
+                      controller,
+                      allowScrubbing: true,
+                      colors: const VideoProgressColors(
+                        playedColor: Colors.white,
+                        bufferedColor: Colors.white54,
+                        backgroundColor: Colors.white24,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        duration.inMilliseconds > 0
+                            ? '${_formatDuration(position)} / ${_formatDuration(duration)}'
+                            : _formatDuration(position),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  tooltip: 'ملء الشاشة',
+                  onPressed: _openFullScreen,
+                  icon: const Icon(
+                    Icons.fullscreen_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 }
 
@@ -234,6 +477,10 @@ class _PostAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = active
+        ? AppColors.red
+        : Theme.of(context).textTheme.bodyLarge?.color;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(99),
@@ -241,6 +488,7 @@ class _PostAction extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Row(
           children: [
+<<<<<<< HEAD
             Icon(
               icon,
               size: 21,
@@ -248,17 +496,25 @@ class _PostAction extends StatelessWidget {
                   ? AppColors.red
                   : Theme.of(context).textTheme.bodyLarge?.color,
             ),
+=======
+            Icon(icon, size: 21, color: color),
+>>>>>>> 3f65aba7d3a5de726ea1ed17f5f5a21c1e487d14
             const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
+<<<<<<< HEAD
                 color: active
                     ? AppColors.red
                     : Theme.of(context).textTheme.bodyLarge?.color,
+=======
+                color: color,
+>>>>>>> 3f65aba7d3a5de726ea1ed17f5f5a21c1e487d14
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
               ),
             ),
+<<<<<<< HEAD
           ],
         ),
       ),
@@ -288,6 +544,8 @@ class _VideoPlaceholder extends StatelessWidget {
                 fontWeight: FontWeight.w900,
               ),
             ),
+=======
+>>>>>>> 3f65aba7d3a5de726ea1ed17f5f5a21c1e487d14
           ],
         ),
       ),

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../app/routes/app_routes.dart';
-import '../chats/chat_service.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/app_chrome.dart';
+import '../../core/widgets/cached_app_image.dart';
+import '../../core/utils/app_snackbar.dart';
+import '../../core/utils/auth_guard.dart';
+import '../chats/chat_service.dart';
 import 'match_model.dart';
-import '../../core/constants/api_constants.dart';
 
 class MatchDetailsScreen extends StatelessWidget {
   const MatchDetailsScreen({super.key});
@@ -26,9 +30,18 @@ class MatchDetailsScreen extends StatelessWidget {
       );
     }
 
+    final predictionsOpen = match.predictionsOpen;
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppScreenHeader(title: 'تفاصيل المباراة', subtitle: match.league),
+      appBar: AppScreenHeader(
+        title: 'تفاصيل المباراة',
+        subtitle: match.league,
+        leading: IconButton(
+          onPressed: Get.back,
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -89,15 +102,33 @@ class MatchDetailsScreen extends StatelessWidget {
                 _InfoRow(
                   icon: Icons.insights_rounded,
                   title: 'حالة التوقعات',
-                  value: match.predictionState,
+                  value: match.effectivePredictionState,
                 ),
               ],
             ),
           ),
+
           const SizedBox(height: 16),
+
+          if (predictionsOpen) ...[
+            ElevatedButton.icon(
+              onPressed: () {
+                if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من توقع نتيجة المباراة.')) return;
+                Get.toNamed(Routes.matchPrediction, arguments: match);
+              },
+              icon: const Icon(Icons.sports_score_outlined),
+              label: const Text(
+                'توقع نتيجة المباراة',
+                style: TextStyle(fontWeight: FontWeight.w900),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
 
           ElevatedButton.icon(
             onPressed: () async {
+              if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من دخول شات المباراة.')) return;
+
               try {
                 final chat = await Get.find<ChatService>().getMatchChat(
                   match.id,
@@ -115,15 +146,14 @@ class MatchDetailsScreen extends StatelessWidget {
               } catch (e) {
                 debugPrint('CHAT BUTTON ERROR = $e');
 
-                Get.snackbar(
-                  'خطأ',
-                  e.toString().replaceFirst('Exception: ', ''),
-                  snackPosition: SnackPosition.BOTTOM,
-                );
+                AppSnackbar.show('خطأ', AppSnackbar.cleanError(e));
               }
             },
             icon: const Icon(Icons.chat_bubble_outline),
-            label: const Text('دخول شات المباراة'),
+            label: const Text(
+              'دخول شات المباراة',
+              style: TextStyle(fontWeight: FontWeight.w900),
+            ),
           ),
         ],
       ),
@@ -156,18 +186,16 @@ class _TeamBlock extends StatelessWidget {
           backgroundColor: Colors.white,
           child: logoUrl != null
               ? ClipOval(
-                  child: Image.network(
-                    fullLogoUrl,
+                  child: CachedAppImage(
+                    imageUrl: fullLogoUrl,
                     width: 52,
                     height: 52,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) {
-                      return const Icon(
-                        Icons.shield_outlined,
-                        color: AppColors.black,
-                        size: 34,
-                      );
-                    },
+                    errorWidget: const Icon(
+                      Icons.shield_outlined,
+                      color: AppColors.black,
+                      size: 34,
+                    ),
                   ),
                 )
               : const Icon(
