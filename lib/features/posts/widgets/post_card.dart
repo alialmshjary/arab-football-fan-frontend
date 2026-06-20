@@ -54,15 +54,10 @@ class PostCard extends StatelessWidget {
               child: Row(
                 children: [
                   InkWell(
-<<<<<<< HEAD
-                    onTap: () =>
-                        Get.toNamed(Routes.fanProfile, arguments: post.fanId),
-=======
                     onTap: () {
                       if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من فتح الملفات الشخصية.')) return;
                       Get.toNamed(Routes.fanProfile, arguments: post.fanId);
                     },
->>>>>>> 3f65aba7d3a5de726ea1ed17f5f5a21c1e487d14
                     borderRadius: BorderRadius.circular(99),
                     child: AppAvatar(
                       imageUrl: post.fanProfilePicUrl,
@@ -169,18 +164,6 @@ class PostCard extends StatelessWidget {
                           imageUrl: mediaUrl,
                           fit: BoxFit.contain,
                           alignment: Alignment.center,
-<<<<<<< HEAD
-                          errorBuilder: (_, __, ___) => const _MediaError(),
-                          loadingBuilder: (context, child, progress) {
-                            if (progress == null) return child;
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.red,
-                              ),
-                            );
-                          },
-=======
                           placeholder: const Center(
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
@@ -188,7 +171,6 @@ class PostCard extends StatelessWidget {
                             ),
                           ),
                           errorWidget: const _MediaError(),
->>>>>>> 3f65aba7d3a5de726ea1ed17f5f5a21c1e487d14
                         ),
                 ),
               ),
@@ -488,64 +470,16 @@ class _PostAction extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Row(
           children: [
-<<<<<<< HEAD
-            Icon(
-              icon,
-              size: 21,
-              color: active
-                  ? AppColors.red
-                  : Theme.of(context).textTheme.bodyLarge?.color,
-            ),
-=======
             Icon(icon, size: 21, color: color),
->>>>>>> 3f65aba7d3a5de726ea1ed17f5f5a21c1e487d14
             const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
-<<<<<<< HEAD
-                color: active
-                    ? AppColors.red
-                    : Theme.of(context).textTheme.bodyLarge?.color,
-=======
                 color: color,
->>>>>>> 3f65aba7d3a5de726ea1ed17f5f5a21c1e487d14
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
               ),
             ),
-<<<<<<< HEAD
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _VideoPlaceholder extends StatelessWidget {
-  const _VideoPlaceholder({required this.mediaUrl});
-
-  final String mediaUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.black,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 58),
-            SizedBox(height: 8),
-            Text(
-              'فيديو',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-=======
->>>>>>> 3f65aba7d3a5de726ea1ed17f5f5a21c1e487d14
           ],
         ),
       ),
