@@ -18,7 +18,6 @@ class StorageService {
   static const String _favoriteTeamKey = 'favorite_team';
   static const String _favoritePlayerKey = 'favorite_player';
   static const String _themeModeKey = 'theme_mode';
-  static const String _isGuestKey = 'is_guest';
 
   static String? get token => _box.read<String>(_tokenKey);
   static int? get userId => _box.read<int>(_userIdKey);
@@ -26,8 +25,8 @@ class StorageService {
   static String? get email => _box.read<String>(_emailKey);
   static String? get role => _box.read<String>(_roleKey);
   static bool get rememberMe => _box.read<bool>(_rememberKey) ?? true;
-  static bool get isGuest => _box.read<bool>(_isGuestKey) ?? false;
-  static bool get canInteract => isLoggedIn && !isGuest;
+  static bool get isGuest => !isLoggedIn;
+  static bool get canInteract => isLoggedIn;
 
   static FavoriteTeam? get favoriteTeam {
     final stored = _box.read(_favoriteTeamKey);
@@ -72,10 +71,10 @@ class StorageService {
 
   static bool get isLoggedIn {
     final savedToken = token;
-    return savedToken != null && savedToken.isNotEmpty && !isGuest;
+    return savedToken != null && savedToken.isNotEmpty;
   }
 
-  static bool get canEnterApp => isLoggedIn || isGuest;
+  static bool get canEnterApp => true;
 
   static Future<void> saveSession({
     required String token,
@@ -91,12 +90,10 @@ class StorageService {
     await _box.write(_emailKey, email);
     await _box.write(_roleKey, role);
     await _box.write(_rememberKey, remember);
-    await _box.write(_isGuestKey, false);
   }
 
   static Future<void> saveGuestSession() async {
     await clearSession();
-    await _box.write(_isGuestKey, true);
   }
 
   static Future<void> saveFavoriteTeam(FavoriteTeam team) async {
@@ -119,8 +116,8 @@ class StorageService {
     final value = mode == ThemeMode.dark
         ? 'dark'
         : mode == ThemeMode.system
-            ? 'system'
-            : 'light';
+        ? 'system'
+        : 'light';
     await _box.write(_themeModeKey, value);
   }
 
@@ -130,6 +127,5 @@ class StorageService {
     await _box.remove(_usernameKey);
     await _box.remove(_emailKey);
     await _box.remove(_roleKey);
-    await _box.remove(_isGuestKey);
   }
 }

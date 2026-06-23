@@ -43,7 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirm = await Get.dialog<bool>(
       AlertDialog(
         title: const Text('تسجيل الخروج؟'),
-        content: const Text('سيتم إنهاء الجلسة الحالية والرجوع إلى شاشة الدخول.'),
+        content: const Text('سيتم إنهاء الجلسة الحالية والرجوع كضيف إلى الصفحة الرئيسية.'),
         actions: [
           TextButton(onPressed: () => Get.back(result: false), child: const Text('إلغاء')),
           TextButton(onPressed: () => Get.back(result: true), child: const Text('تسجيل الخروج')),
@@ -61,7 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (Get.isRegistered<AuthController>()) {
       Get.delete<AuthController>(force: true);
     }
-    Get.offAllNamed(Routes.auth);
+    Get.offAllNamed(Routes.home);
   }
 
   @override

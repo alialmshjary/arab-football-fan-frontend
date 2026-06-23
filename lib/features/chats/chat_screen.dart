@@ -11,9 +11,69 @@ import 'widgets/chat_image_widget.dart';
 import 'widgets/chat_video_widget.dart';
 import 'chat_message_model.dart';
 import '../../core/utils/date_time_utils.dart';
+import '../reports/report_dialog.dart';
 
 class ChatScreen extends GetView<ChatController> {
   const ChatScreen({super.key});
+
+  void _showMessageActions({
+    required ChatMessageModel message,
+    required bool isMe,
+  }) {
+    Get.bottomSheet(
+      SafeArea(
+        child: Wrap(
+          children: [
+            if (isMe)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: AppColors.red),
+                title: const Text('حذف الرسالة'),
+                onTap: () {
+                  Get.back();
+                  _confirmDeleteMessage(message.messageId);
+                },
+              )
+            else
+              ListTile(
+                leading: const Icon(
+                  Icons.report_gmailerrorred_outlined,
+                  color: AppColors.red,
+                ),
+                title: const Text('تقديم بلاغ'),
+                onTap: () {
+                  Get.back();
+                  ReportDialog.show(targetType: 3, targetId: message.messageId);
+                },
+              ),
+          ],
+        ),
+      ),
+      backgroundColor: Colors.white,
+    );
+  }
+
+  void _confirmDeleteMessage(int messageId) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('حذف الرسالة'),
+        content: const Text('هل أنت متأكد أنك تريد حذف هذه الرسالة؟'),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('إلغاء')),
+          ElevatedButton(
+            onPressed: () async {
+              Get.back();
+              await controller.deleteMessage(messageId);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('حذف'),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _messageContent({
     required bool isMe,
@@ -106,28 +166,31 @@ class ChatScreen extends GetView<ChatController> {
       );
     }
 
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * .78,
-        ),
-        margin: const EdgeInsets.only(bottom: 8),
-        child: Column(
-          crossAxisAlignment: isMe
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _messageContent(
-              isMe: isMe,
-              isMedia: isMedia,
-              time: time,
-              child: content,
-              showSenderName: showSenderName,
-              senderName: message.senderName,
-            ),
-          ],
+    return GestureDetector(
+      onLongPress: () => _showMessageActions(message: message, isMe: isMe),
+      child: Align(
+        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * .78,
+          ),
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Column(
+            crossAxisAlignment: isMe
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _messageContent(
+                isMe: isMe,
+                isMedia: isMedia,
+                time: time,
+                child: content,
+                showSenderName: showSenderName,
+                senderName: message.senderName,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -210,7 +273,7 @@ class ChatScreen extends GetView<ChatController> {
                       !isMe &&
                       message.senderName != null &&
                       message.senderName!.isNotEmpty;
-                      
+
                   final showDateSeparator =
                       index == 0 ||
                       !DateTimeUtils.isSameDay(

@@ -67,18 +67,26 @@ class _ProfileHero extends StatelessWidget {
                             size: 74,
                           ),
                         ),
-                        if (team != null)
-                          Positioned(
-                            left: 22,
-                            bottom: 16,
-                            child: TeamBadge(
-                              shortName: team.shortName,
-                              logoUrl: team.logoUrl,
-                              primary: team.primary,
-                              secondary: team.secondary,
-                              size: 52,
-                            ),
+                        Positioned(
+                          left: 22,
+                          bottom: 16,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (team != null) ...[
+                                TeamBadge(
+                                  shortName: team.shortName,
+                                  logoUrl: team.logoUrl,
+                                  primary: team.primary,
+                                  secondary: team.secondary,
+                                  size: 52,
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              _HeroPointsBadge(points: profile.points),
+                            ],
                           ),
+                        ),
                         if (!controller.isMyProfile)
                           Positioned(
                             right: 12,
@@ -365,6 +373,47 @@ class _HeroAction extends StatelessWidget {
               Text(label, style: const TextStyle(fontWeight: FontWeight.w900)),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroPointsBadge extends StatelessWidget {
+  const _HeroPointsBadge({required this.points});
+
+  final int points;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Theme.of(context).cardColor,
+      elevation: 4,
+      shadowColor: Colors.black12,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Theme.of(context).dividerColor),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.stars_rounded,
+              color: AppColors.red,
+              size: 17,
+            ),
+            const SizedBox(width: 5),
+            Text(
+              '${_ProfileHero._formatNumber(points)} نقطة',
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
         ),
       ),
     );

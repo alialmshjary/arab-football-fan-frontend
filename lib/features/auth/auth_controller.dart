@@ -127,12 +127,6 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> continueAsGuest() async {
-    await StorageService.saveGuestSession();
-    _clearFields();
-    Get.offAllNamed(Routes.home);
-  }
-
   Future<void> logout() async {
     try {
       await _service.logout();
@@ -148,7 +142,7 @@ class AuthController extends GetxController {
     hidePassword.value = true;
     hideConfirmPassword.value = true;
 
-    Get.offAllNamed(Routes.auth);
+    Get.offAllNamed(Routes.home);
   }
 
   void _clearFields() {

@@ -639,6 +639,12 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                             isDeleting: commentsController.deletingCommentIds
                                 .contains(comment.id),
                             onReport: () {
+                              if (!AuthGuard.requireLogin(
+                                message:
+                                    'يجب عليك تسجيل الدخول أولاً حتى تتمكن من الإبلاغ عن التعليق.',
+                              )) {
+                                return;
+                              }
                               ReportDialog.show(
                                 targetType: 2,
                                 targetId: comment.id,
@@ -723,59 +729,60 @@ class _CommentTile extends StatelessWidget {
               ],
             ),
           ),
-          PopupMenuButton<String>(
-            tooltip: 'خيارات التعليق',
-            padding: EdgeInsets.zero,
-            icon: const Icon(
-              Icons.more_vert_rounded,
-              color: AppColors.muted,
-              size: 21,
-            ),
-            onSelected: (value) {
-              if (value == 'report') {
-                onReport();
-              } else if (value == 'delete' && onDelete != null) {
-                onDelete!();
-              }
-            },
-            itemBuilder: (context) => [
-              if (canReport)
-                const PopupMenuItem(
-                  value: 'report',
-                  child: Row(
-                    children: [
-                      Icon(Icons.flag_outlined, color: AppColors.red),
-                      SizedBox(width: 8),
-                      Text('إبلاغ عن التعليق'),
-                    ],
+          if (canReport || canDelete)
+            PopupMenuButton<String>(
+              tooltip: 'خيارات التعليق',
+              padding: EdgeInsets.zero,
+              icon: const Icon(
+                Icons.more_vert_rounded,
+                color: AppColors.muted,
+                size: 21,
+              ),
+              onSelected: (value) {
+                if (value == 'report') {
+                  onReport();
+                } else if (value == 'delete' && onDelete != null) {
+                  onDelete!();
+                }
+              },
+              itemBuilder: (context) => [
+                if (canReport)
+                  const PopupMenuItem(
+                    value: 'report',
+                    child: Row(
+                      children: [
+                        Icon(Icons.flag_outlined, color: AppColors.red),
+                        SizedBox(width: 8),
+                        Text('إبلاغ عن التعليق'),
+                      ],
+                    ),
                   ),
-                ),
-              if (canDelete)
-                PopupMenuItem(
-                  value: 'delete',
-                  enabled: !isDeleting,
-                  child: Row(
-                    children: [
-                      isDeleting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.red,
+                if (canDelete)
+                  PopupMenuItem(
+                    value: 'delete',
+                    enabled: !isDeleting,
+                    child: Row(
+                      children: [
+                        isDeleting
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.red,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.delete_outline_rounded,
+                                color: AppColors.muted,
                               ),
-                            )
-                          : const Icon(
-                              Icons.delete_outline_rounded,
-                              color: AppColors.muted,
-                            ),
-                      const SizedBox(width: 8),
-                      const Text('حذف التعليق'),
-                    ],
+                        const SizedBox(width: 8),
+                        const Text('حذف التعليق'),
+                      ],
+                    ),
                   ),
-                ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );

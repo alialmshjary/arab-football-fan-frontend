@@ -94,7 +94,6 @@ class ChatService {
     required void Function(ChatMessageModel message) onMessageReceived,
     required void Function(String error) onError,
   }) async {
-
     if (_hubConnection != null) {
       await disconnect();
     }
@@ -187,5 +186,9 @@ class ChatService {
     }
 
     return data;
+  }
+
+  Future<void> deleteMessage(int messageId) async {
+    await _apiClient.delete<dynamic>('${ApiConstants.messages}/$messageId');
   }
 }

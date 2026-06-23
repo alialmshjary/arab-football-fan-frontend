@@ -205,20 +205,6 @@ class AuthScreen extends GetView<AuthController> {
                               isOutlined: true,
                               onPressed: () => controller.toggleMode(!login),
                             ),
-                            if (login) ...[
-                              const SizedBox(height: 10),
-                              TextButton.icon(
-                                onPressed: controller.isLoading.value ? null : controller.continueAsGuest,
-                                icon: const Icon(Icons.visibility_outlined, color: AppColors.red),
-                                label: const Text(
-                                  'الدخول كضيف',
-                                  style: TextStyle(
-                                    color: AppColors.red,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                              ),
-                            ],
                           ],
                         ),
                       ),

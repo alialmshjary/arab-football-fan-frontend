@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 
 import '../../app/routes/app_routes.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/storage/storage_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -54,7 +53,7 @@ class _SplashScreenState extends State<SplashScreen>
     _timer = Timer(const Duration(milliseconds: 2100), () {
       if (!mounted) return;
 
-      Get.offAllNamed(StorageService.canEnterApp ? Routes.home : Routes.auth);
+      Get.offAllNamed(Routes.home);
     });
   }
 

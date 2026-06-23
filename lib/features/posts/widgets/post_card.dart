@@ -55,7 +55,11 @@ class PostCard extends StatelessWidget {
                 children: [
                   InkWell(
                     onTap: () {
-                      if (!AuthGuard.requireLogin(message: 'يجب عليك تسجيل الدخول أولاً حتى تتمكن من فتح الملفات الشخصية.')) return;
+                      if (!AuthGuard.requireLogin(
+                        message:
+                            'يجب عليك تسجيل الدخول أولاً حتى تتمكن من فتح الملفات الشخصية.',
+                      ))
+                        return;
                       Get.toNamed(Routes.fanProfile, arguments: post.fanId);
                     },
                     borderRadius: BorderRadius.circular(99),
@@ -118,6 +122,13 @@ class PostCard extends StatelessWidget {
                       icon: const Icon(Icons.more_vert, color: AppColors.muted),
                       onSelected: (value) {
                         if (value == 'report') {
+                          if (!AuthGuard.requireLogin(
+                            message:
+                                'يجب عليك تسجيل الدخول أولاً حتى تتمكن من الإبلاغ عن المنشور.',
+                          )) {
+                            return;
+                          }
+
                           ReportDialog.show(targetType: 1, targetId: post.id);
                         }
                       },

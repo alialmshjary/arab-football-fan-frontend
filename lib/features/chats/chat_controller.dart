@@ -56,7 +56,10 @@ class ChatController extends GetxController {
       messages.assignAll(result);
       scrollToBottom();
     } catch (e) {
-      AppSnackbar.show('خطأ', 'تعذر تحميل الرسائل. تحقق من اتصالك وحاول مرة أخرى.');
+      AppSnackbar.show(
+        'خطأ',
+        'تعذر تحميل الرسائل. تحقق من اتصالك وحاول مرة أخرى.',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -88,7 +91,10 @@ class ChatController extends GetxController {
       isConnected.value = true;
     } catch (e) {
       isConnected.value = false;
-      AppSnackbar.show('خطأ', 'تعذر الاتصال بالشات. تحقق من اتصالك وحاول مرة أخرى.');
+      AppSnackbar.show(
+        'خطأ',
+        'تعذر الاتصال بالشات. تحقق من اتصالك وحاول مرة أخرى.',
+      );
     }
   }
 
@@ -157,6 +163,17 @@ class ChatController extends GetxController {
     } finally {
       isUploading.value = false;
       isSending.value = false;
+    }
+  }
+
+  Future<void> deleteMessage(int messageId) async {
+    try {
+      await _service.deleteMessage(messageId);
+      messages.removeWhere((message) => message.messageId == messageId);
+      AppSnackbar.show('تم الحذف', 'تم حذف الرسالة بنجاح');
+    } catch (e) {
+      debugPrint('DELETE MESSAGE ERROR = $e');
+      AppSnackbar.show('خطأ', AppSnackbar.cleanError(e));
     }
   }
 
